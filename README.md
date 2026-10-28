@@ -82,8 +82,24 @@ viveroParaiso_v2/
 ├── seed.py                 # Datos de prueba para demostración
 ├── schema.sql              # Estructura DDL de la base de datos
 ├── requirements.txt        # Dependencias de Python
+├── run.bat                 # Lanzador automático de 1 clic (Windows)
+├── run.ps1                 # Script de arranque para PowerShell
 └── .env.example            # Plantilla de variables de entorno
 ```
+
+---
+
+## ⚡ Inicio Rápido Automático (Recomendado)
+
+Si estás en **Windows**, ¡no necesitas configurar nada a mano!
+
+Simplemente haz doble clic en **`run.bat`** (o ejecuta en tu terminal `.\run.bat` o `.\run.ps1`).
+
+El script automáticamente:
+1. Creará el archivo `.env` si aún no existe.
+2. Detectará tu versión de Python (usando `py` o `python`).
+3. Creará el entorno virtual `.venv` y descargará las dependencias.
+4. Iniciará el servidor en **http://127.0.0.1:5000** listo para probar.
 
 ---
 
@@ -117,9 +133,11 @@ Crea un entorno virtual aislado para instalar las dependencias:
 
 **En Windows (PowerShell):**
 ```powershell
-python -m venv .venv
+# Usa python o el lanzador oficial py:
+py -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
+> *Tip:* Si `python` te muestra el mensaje *"Python was not found..."* de la Microsoft Store, usa siempre `py -m venv .venv`.  
 > *Nota:* Si PowerShell muestra una restricción de ejecución de scripts, ejecuta:
 > ```powershell
 > Set-ExecutionPolicy -Scope CurrentUser RemoteSigned

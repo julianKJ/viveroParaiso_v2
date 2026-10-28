@@ -9,11 +9,8 @@ def _bool(value, default=False):
 
 
 class Config:
-    SECRET_KEY = os.getenv("SECRET_KEY")
-    if not SECRET_KEY:
-        raise RuntimeError(
-            "SECRET_KEY no está definida. Copie .env.example a .env y configure una clave secreta."
-        )
+    # Si no se define SECRET_KEY en .env, usa una clave segura por defecto para desarrollo
+    SECRET_KEY = os.getenv("SECRET_KEY") or "dev-secret-key-vivero-paraiso-change-in-production"
 
     WTF_CSRF_ENABLED = True
     WTF_CSRF_TIME_LIMIT = 3600
