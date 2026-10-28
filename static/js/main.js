@@ -27,6 +27,23 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    const indicadoresApi = document.querySelectorAll("[data-api-status]");
+    if (indicadoresApi.length && window.ViveroAPI) {
+        window.ViveroAPI.salud()
+            .then(() => {
+                indicadoresApi.forEach((el) => {
+                    el.dataset.apiStatus = "ok";
+                    el.textContent = "API conectada";
+                });
+            })
+            .catch(() => {
+                indicadoresApi.forEach((el) => {
+                    el.dataset.apiStatus = "error";
+                    el.textContent = "API no disponible";
+                });
+            });
+    }
+
     setTimeout(() => {
         document.querySelectorAll(".flash-stack .flash").forEach((el) => {
             el.style.opacity = "0";

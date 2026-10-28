@@ -67,6 +67,10 @@
         </div>
     </div>
     <div class="sidebar-backdrop" data-toggle-sidebar></div>
+    <script>
+        window.VIVERO_API_URL = "{{ config.API_BASE_URL }}";
+    </script>
+    <script src="{{ url_for('static', filename='js/api-client.js') }}"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>

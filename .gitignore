@@ -12,3 +12,4 @@ htmlcov/
 .vscode/
 *.zip
 instance/
+node_modules/

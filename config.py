@@ -25,6 +25,9 @@ class Config:
     MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD", "")
     MYSQL_DATABASE = os.getenv("MYSQL_DATABASE", "vivero_paraiso")
 
+    # URL base de la API Node.js + Express + Prisma que expone la misma base MySQL.
+    API_BASE_URL = os.getenv("API_BASE_URL", "http://127.0.0.1:4000/api")
+
     MAX_LOGIN_ATTEMPTS = int(os.getenv("MAX_LOGIN_ATTEMPTS", "5"))
     LOGIN_LOCK_MINUTES = int(os.getenv("LOGIN_LOCK_MINUTES", "15"))
     ITEMS_PER_PAGE = int(os.getenv("ITEMS_PER_PAGE", "10"))

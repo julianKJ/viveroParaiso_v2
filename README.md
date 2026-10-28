@@ -64,9 +64,13 @@ viveroParaiso_v2/
 │   ├── productos.py
 │   ├── proveedores.py
 │   └── usuarios.py
+├── api/                    # Capa de datos Node.js + Express + Prisma (misma base MySQL)
+│   ├── prisma/             # schema.prisma (modelos equivalentes a las tablas)
+│   └── src/                # Servidor Express, rutas REST y cliente Prisma
 ├── static/                 # Recursos estáticos (CSS, SVGs, imágenes)
 │   ├── css/
-│   └── img/
+│   ├── img/
+│   └── js/                 # main.js y api-client.js (cliente de la API)
 ├── templates/              # Vistas HTML renderizadas con Jinja2
 │   ├── componentes/
 │   ├── errores/
@@ -239,7 +243,60 @@ Abre tu navegador web e ingresa a:
 
 ---
 
-## 🔒 Seguridad Implementada
+## � API Node.js + Prisma
+
+Además del backend Flask, el proyecto incluye una capa de acceso a datos en **Node.js + Express + Prisma** que trabaja sobre la **misma base MySQL** (`vivero_paraiso`) y expone endpoints JSON.
+
+```text
+api/
+├── prisma/schema.prisma   # Modelos que reflejan las tablas de schema.sql
+├── src/index.js           # Servidor Express y middleware de errores
+├── src/prisma.js          # Cliente Prisma compartido
+├── src/lib/http.js        # Validaciones y utilidades de respuesta
+└── src/routes/            # productos, clientes, empleados, proveedores, dashboard
+```
+
+### Puesta en marcha
+
+```powershell
+cd api
+
+# Genera .env tomando las credenciales del .env raíz (sin duplicar la contraseña)
+$mysql = Get-Content ..\.env | ConvertFrom-StringData
+"DATABASE_URL=`"mysql://$($mysql.MYSQL_USER):$($mysql.MYSQL_PASSWORD)@$($mysql.MYSQL_HOST):$($mysql.MYSQL_PORT)/$($mysql.MYSQL_DATABASE)`"" | Set-Content .env
+Add-Content .env "PORT=4000`nCORS_ORIGIN=http://127.0.0.1:5000"
+
+npm install
+npx prisma generate     # genera el cliente a partir de schema.prisma
+npm start               # API en http://127.0.0.1:4000/api
+```
+
+### Endpoints principales
+
+| Método | Ruta | Descripción |
+| :--- | :--- | :--- |
+| `GET` | `/api/health` | Verifica la conexión con MySQL |
+| `GET` `POST` | `/api/productos` | Listado con `q`, `categoria`, `bajo_stock`, `page`, `limit` / creación |
+| `GET` `PUT` `DELETE` | `/api/productos/:id` | Detalle, actualización y borrado |
+| `GET` | `/api/productos/categorias` | Categorías distintas |
+| `GET` `POST` | `/api/clientes`, `/api/empleados`, `/api/proveedores` | Mismos verbos CRUD por recurso |
+| `GET` | `/api/proveedores/activos` | Proveedores con estado `Activo` |
+| `GET` | `/api/dashboard/resumen` | Totales, últimos productos y alertas de stock bajo |
+
+### Uso desde el frontend
+
+`templates/base.html` carga `static/js/api-client.js`, que expone `window.ViveroAPI` con `listar`, `obtener`, `crear`, `actualizar` y `eliminar` por recurso:
+
+```javascript
+const { data, total } = await ViveroAPI.productos.listar({ q: "cactus", page: 1 });
+await ViveroAPI.productos.crear({ nombre: "Helecho", categoria: "Interior", /* ... */ });
+```
+
+La URL base proviene de la configuración Flask `API_BASE_URL` (por defecto `http://127.0.0.1:4000/api`), ajustable en `.env` sin tocar el JavaScript.
+
+---
+
+## �🔒 Seguridad Implementada
 
 * **Protección CSRF:** Todos los formularios POST exigen un token criptográfico generado por `Flask-WTF`.
 * **Hash Criptográfico:** Contraseñas protegidas mediante algoritmos de hash seguros provistos por `werkzeug.security` (`scrypt`/`pbkdf2`), nunca en texto plano.

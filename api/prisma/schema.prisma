@@ -1,0 +1,129 @@
+// Modelo de datos Prisma para la base MySQL `vivero_paraiso`.
+// Refleja exactamente las tablas definidas en ../schema.sql (sin cambios destructivos).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Rol {
+  admin
+  empleado
+}
+
+enum EstadoProveedor {
+  Activo
+  Inactivo
+}
+
+enum EstadoLaboral {
+  Activo
+  Inactivo
+  Vacaciones
+}
+
+enum TipoDocumento {
+  CC
+  CE
+  NIT
+  Pasaporte
+  TI
+}
+
+model Usuario {
+  id           Int      @id @default(autoincrement()) @db.UnsignedInt
+  username     String   @unique(map: "uk_usuarios_username") @db.VarChar(50)
+  email        String   @unique(map: "uk_usuarios_email") @db.VarChar(120)
+  passwordHash String   @map("password_hash") @db.VarChar(255)
+  rol          Rol      @default(empleado)
+  activo       Boolean  @default(true)
+  creadoEn     DateTime @default(now()) @map("creado_en") @db.DateTime(0)
+
+  @@map("usuarios")
+}
+
+model Proveedor {
+  id                     Int             @id @default(autoincrement()) @db.UnsignedInt
+  nombreEmpresa          String          @map("nombre_empresa") @db.VarChar(150)
+  nit                    String          @unique(map: "uk_proveedores_nit") @db.VarChar(30)
+  personaContacto        String          @map("persona_contacto") @db.VarChar(120)
+  telefono               String          @db.VarChar(20)
+  correo                 String          @db.VarChar(120)
+  direccion              String          @db.VarChar(200)
+  productosSuministrados String?         @map("productos_suministrados") @db.Text
+  estado                 EstadoProveedor @default(Activo)
+  fechaRegistro          DateTime        @default(now()) @map("fecha_registro") @db.DateTime(0)
+
+  productos Producto[]
+
+  @@index([nombreEmpresa], map: "idx_proveedores_nombre")
+  @@index([personaContacto], map: "idx_proveedores_contacto")
+  @@map("proveedores")
+}
+
+model Cliente {
+  id              Int           @id @default(autoincrement()) @db.UnsignedInt
+  nombres         String        @db.VarChar(80)
+  apellidos       String        @db.VarChar(80)
+  tipoDocumento   TipoDocumento @map("tipo_documento")
+  numeroDocumento String        @unique(map: "uk_clientes_documento") @map("numero_documento") @db.VarChar(30)
+  telefono        String        @db.VarChar(20)
+  correo          String        @unique(map: "uk_clientes_correo") @db.VarChar(120)
+  direccion       String        @db.VarChar(200)
+  fechaRegistro   DateTime      @default(now()) @map("fecha_registro") @db.DateTime(0)
+
+  @@index([nombres, apellidos], map: "idx_clientes_nombres")
+  @@map("clientes")
+}
+
+model Empleado {
+  id                Int           @id @default(autoincrement()) @db.UnsignedInt
+  nombres           String        @db.VarChar(80)
+  apellidos         String        @db.VarChar(80)
+  tipoDocumento     TipoDocumento @map("tipo_documento")
+  numeroDocumento   String        @unique(map: "uk_empleados_documento") @map("numero_documento") @db.VarChar(30)
+  cargo             String        @db.VarChar(80)
+  telefono          String        @db.VarChar(20)
+  correo            String        @unique(map: "uk_empleados_correo") @db.VarChar(120)
+  fechaContratacion DateTime      @map("fecha_contratacion") @db.Date
+  estadoLaboral     EstadoLaboral @default(Activo) @map("estado_laboral")
+  fechaRegistro     DateTime      @default(now()) @map("fecha_registro") @db.DateTime(0)
+
+  @@index([nombres, apellidos], map: "idx_empleados_nombres")
+  @@index([cargo], map: "idx_empleados_cargo")
+  @@map("empleados")
+}
+
+model Producto {
+  id                 Int      @id @default(autoincrement()) @db.UnsignedInt
+  nombre             String   @db.VarChar(150)
+  categoria          String   @db.VarChar(80)
+  descripcion        String?  @db.Text
+  precioCompra       Decimal  @map("precio_compra") @db.Decimal(12, 2)
+  precioVenta        Decimal  @map("precio_venta") @db.Decimal(12, 2)
+  cantidadDisponible Int      @default(0) @map("cantidad_disponible")
+  stockMinimo        Int      @default(0) @map("stock_minimo")
+  proveedorId        Int      @map("proveedor_id") @db.UnsignedInt
+  fechaRegistro      DateTime @default(now()) @map("fecha_registro") @db.DateTime(0)
+
+  proveedor Proveedor @relation(fields: [proveedorId], references: [id], onUpdate: Cascade, onDelete: Restrict, map: "fk_productos_proveedor")
+
+  @@index([nombre], map: "idx_productos_nombre")
+  @@index([categoria], map: "idx_productos_categoria")
+  @@index([cantidadDisponible, stockMinimo], map: "idx_productos_stock")
+  @@map("productos")
+}
+
+model IntentoAcceso {
+  id             Int       @id @default(autoincrement()) @db.UnsignedInt
+  clave          String    @unique(map: "uk_intentos_clave") @db.VarChar(255)
+  intentos       Int       @default(0)
+  bloqueadoHasta DateTime? @map("bloqueado_hasta") @db.DateTime(0)
+  actualizadoEn  DateTime  @default(now()) @updatedAt @map("actualizado_en") @db.DateTime(0)
+
+  @@map("intentos_acceso")
+}
