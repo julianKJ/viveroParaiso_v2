@@ -3,23 +3,33 @@
 {% block content %}
 <section class="login-card">
     <div class="login-hero">
-        <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="Logo" width="72" height="72">
-        <h1>Vivero El Paraíso de las Plantas</h1>
-        <p>Sistema de información para el control de inventario, clientes, empleados y proveedores.</p>
+        <img class="hero-bg" src="{{ url_for('static', filename='img/brote.webp') }}" alt="">
+        <div class="brand">
+            <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="Logo" width="40" height="40">
+            <div>
+                <strong>Paraíso</strong>
+                <small>de las Plantas</small>
+            </div>
+        </div>
+        <div>
+            <p class="hero-eyebrow">Vivero El Paraíso</p>
+            <h1>Todo tu vivero, en un solo lugar</h1>
+            <p>Controla inventario, clientes, empleados y proveedores desde un mismo panel.</p>
+        </div>
     </div>
     <form method="post" class="login-form" novalidate>
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <h2>Iniciar sesión</h2>
         <label>
             Usuario o correo electrónico
-            <input type="text" name="identificador" required maxlength="120" autocomplete="username">
+            <input type="text" name="identificador" required maxlength="120" autocomplete="username" placeholder="admin">
         </label>
         <label>
             Contraseña
-            <input type="password" name="password" required minlength="8" autocomplete="current-password">
+            <input type="password" name="password" required minlength="8" autocomplete="current-password" placeholder="••••••••">
         </label>
         <button type="submit" class="btn btn-primary full"><i class="fa-solid fa-right-to-bracket"></i> Entrar</button>
-        <div style="margin-top: 1rem; padding: 0.6rem 0.8rem; border-radius: 6px; background-color: #f0fdf4; border: 1px dashed #22c55e; font-size: 0.82rem; color: #166534; text-align: center;">
+        <div class="demo-hint">
             <i class="fa-solid fa-vial"></i> <strong>Acceso de prueba interno:</strong><br>
             Usuario: <code>admin</code> | Contraseña: <code>admin123</code>
         </div>

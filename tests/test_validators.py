@@ -1,4 +1,6 @@
-from utils.validators import validate_email, validate_password, validate_decimal, validate_document
+from decimal import Decimal
+
+from utils.validators import validate_email, validate_password, validate_decimal, validate_document, validate_int
 
 
 def test_email_valido():
@@ -23,6 +25,25 @@ def test_precio_invalido():
     valor, error = validate_decimal("abc", "precio")
     assert valor is None
     assert error
+
+
+def test_precio_rechaza_notacion_cientifica_y_simbolos():
+    for texto in ("1e5", "2E3", "Infinity", "NaN", "+5", "-5", "1_000", "12.345"):
+        valor, error = validate_decimal(texto, "precio")
+        assert valor is None, texto
+        assert error
+
+
+def test_precio_valido_con_decimales():
+    assert validate_decimal("45000", "precio") == (Decimal("45000"), None)
+    assert validate_decimal("12,50", "precio") == (Decimal("12.50"), None)
+
+
+def test_entero_rechaza_letras():
+    for texto in ("1e2", "+3", "1_000", "3.5", "abc"):
+        valor, error = validate_int(texto, "cantidad")
+        assert valor is None, texto
+        assert error
 
 
 def test_documento_valido():

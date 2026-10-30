@@ -32,10 +32,19 @@ def create_app():
 
     app.teardown_appcontext(close_connection)
 
+    def imagen_producto(producto_id):
+        """Devuelve la ruta de static/img/productos/<id>.<ext> si existe, o None."""
+        for ext in ("webp", "jpg", "jpeg", "png"):
+            relativa = f"img/productos/{producto_id}.{ext}"
+            if os.path.exists(os.path.join(app.static_folder, relativa)):
+                return relativa
+        return None
+
     @app.context_processor
     def inject_globals():
         return {
             "vivero_nombre": "Vivero El Paraíso de las Plantas",
+            "imagen_producto": imagen_producto,
             "usuario_actual": {
                 "id": session.get("user_id"),
                 "username": session.get("username"),

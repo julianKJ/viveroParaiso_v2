@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240" role="img" aria-label="Planta en maceta">
+  <defs>
+    <linearGradient id="hoja" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7ee08f"/>
+      <stop offset="1" stop-color="#1f8a48"/>
+    </linearGradient>
+    <linearGradient id="hoja2" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5fcf78"/>
+      <stop offset="1" stop-color="#17703a"/>
+    </linearGradient>
+    <linearGradient id="maceta" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#0c3a24"/>
+      <stop offset="0.55" stop-color="#16573a"/>
+      <stop offset="1" stop-color="#0a2e1d"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="100" cy="228" rx="62" ry="8" fill="#000" opacity="0.35"/>
+  <g stroke="#2f7a45" stroke-width="3" stroke-linecap="round" fill="none">
+    <path d="M100 168 C98 130 92 100 70 72"/>
+    <path d="M100 168 C102 124 112 92 136 62"/>
+    <path d="M100 168 C100 120 100 80 102 34"/>
+    <path d="M100 168 C94 140 76 122 46 112"/>
+    <path d="M100 168 C108 140 128 126 158 116"/>
+  </g>
+  <path d="M70 72 C40 70 30 40 44 22 C66 30 80 50 70 72Z" fill="url(#hoja)"/>
+  <path d="M136 62 C166 58 176 30 160 14 C138 24 126 44 136 62Z" fill="url(#hoja2)"/>
+  <path d="M102 34 C86 20 90 2 102 -2 C116 6 116 22 102 34Z" fill="url(#hoja)" transform="translate(0 8)"/>
+  <path d="M46 112 C18 118 4 96 12 78 C34 78 50 92 46 112Z" fill="url(#hoja2)"/>
+  <path d="M158 116 C186 120 198 98 190 80 C168 80 152 96 158 116Z" fill="url(#hoja)"/>
+  <path d="M84 104 C62 96 60 72 72 62 C90 70 96 88 84 104Z" fill="url(#hoja2)" opacity="0.9"/>
+  <path d="M118 98 C140 92 144 68 132 58 C114 66 106 84 118 98Z" fill="url(#hoja)" opacity="0.9"/>
+  <path d="M56 160 H144 L134 222 C133 226 129 228 125 228 H75 C71 228 67 226 66 222 Z" fill="url(#maceta)"/>
+  <rect x="50" y="152" width="100" height="14" rx="7" fill="#124a30"/>
+  <ellipse cx="100" cy="155" rx="44" ry="4" fill="#3b2a1a" opacity="0.8"/>
+</svg>

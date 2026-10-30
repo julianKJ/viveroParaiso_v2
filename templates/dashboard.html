@@ -1,10 +1,17 @@
 {% extends "base.html" %}
 {% block title %}Dashboard{% endblock %}
-{% block heading %}Panel de administración{% endblock %}
-{% block content %}
-<section class="page-intro">
-    <p>Resumen operativo de <strong>{{ vivero_nombre }}</strong>.</p>
+{% block page_head %}
+<section class="hero">
+    <img class="hero-bg hero-bg-panel" src="{{ url_for('static', filename='img/panel.webp') }}" alt="">
+    <div class="hero-text">
+        <p class="hero-eyebrow">Panel de administración</p>
+        <h1>Hola, {{ usuario_actual.username }}.<br>Tu vivero hoy</h1>
+        <p>Resumen operativo de {{ vivero_nombre }}: inventario, clientes, personal y proveedores.</p>
+        <a class="btn btn-primary" href="{{ url_for('productos.lista') }}"><i class="fa-solid fa-seedling"></i> Ver catálogo</a>
+    </div>
 </section>
+{% endblock %}
+{% block content %}
 <div class="stat-grid">
     <a class="stat-card" href="{{ url_for('productos.lista') }}">
         <i class="fa-solid fa-seedling"></i>

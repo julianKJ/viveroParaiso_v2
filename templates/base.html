@@ -7,21 +7,24 @@
     <title>{% block title %}Panel{% endblock %} | {{ vivero_nombre }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
     <div class="app-shell">
-        <aside class="sidebar" id="sidebar">
-            <div class="brand">
-                <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="Logo del vivero" width="44" height="44">
+        <header class="topnav">
+            <button class="icon-btn menu-toggle" type="button" data-toggle-sidebar aria-label="Abrir menú">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <a class="brand" href="{{ url_for('dashboard.index') }}">
+                <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="Logo del vivero" width="40" height="40">
                 <div>
-                    <strong>El Paraíso</strong>
+                    <strong>Paraíso</strong>
                     <small>de las Plantas</small>
                 </div>
-            </div>
-            <nav class="side-nav">
+            </a>
+            <nav class="side-nav" id="sidebar">
                 <a href="{{ url_for('dashboard.index') }}" class="{% if request.endpoint == 'dashboard.index' %}active{% endif %}">
                     <i class="fa-solid fa-leaf"></i> Dashboard
                 </a>
@@ -40,31 +43,28 @@
                     <i class="fa-solid fa-truck-field"></i> Proveedores
                 </a>
             </nav>
-            <form method="post" action="{{ url_for('auth.logout') }}" class="logout-form">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="btn btn-ghost full"><i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión</button>
-            </form>
-        </aside>
-        <div class="main-area">
-            <header class="topbar">
-                <button class="icon-btn menu-toggle" type="button" data-toggle-sidebar aria-label="Abrir menú">
-                    <i class="fa-solid fa-bars"></i>
-                </button>
-                <div class="topbar-title">
-                    <h1>{% block heading %}{{ vivero_nombre }}{% endblock %}</h1>
-                </div>
+            <div class="top-user">
                 {% if usuario_actual %}
                 <div class="user-chip">
                     <i class="fa-solid fa-circle-user"></i>
                     <span>{{ usuario_actual.username }} <small>{{ usuario_actual.rol }}</small></span>
                 </div>
                 {% endif %}
-            </header>
-            <main class="content">
-                {% include "partials/flashes.html" %}
-                {% block content %}{% endblock %}
-            </main>
+                <form method="post" action="{{ url_for('auth.logout') }}" class="logout-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-primary" title="Cerrar sesión"><i class="fa-solid fa-right-from-bracket"></i> <span>Salir</span></button>
+                </form>
+            </div>
+        </header>
+        {% block page_head %}
+        <div class="page-head">
+            <h1>{% block heading %}{{ vivero_nombre }}{% endblock %}</h1>
         </div>
+        {% endblock %}
+        <main class="content">
+            {% include "partials/flashes.html" %}
+            {% block content %}{% endblock %}
+        </main>
     </div>
     <div class="sidebar-backdrop" data-toggle-sidebar></div>
     <script>

@@ -13,6 +13,10 @@
             </form>
         </div>
     </header>
+    {% set foto = imagen_producto(producto.id) %}
+    {% if foto %}
+    <img class="product-photo" src="{{ url_for('static', filename=foto) }}" alt="{{ producto.nombre }}">
+    {% endif %}
     {% if producto.cantidad_disponible <= producto.stock_minimo %}
     <p class="flash flash-warning"><i class="fa-solid fa-triangle-exclamation"></i> Inventario bajo: {{ producto.cantidad_disponible }} unidades (mínimo {{ producto.stock_minimo }}).</p>
     {% endif %}

@@ -6,6 +6,9 @@ EMAIL_RE = re.compile(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$")
 PHONE_RE = re.compile(r"^[0-9+\-\s()]{7,20}$")
 DOCUMENT_RE = re.compile(r"^[A-Za-z0-9.\-]{5,30}$")
 USERNAME_RE = re.compile(r"^[A-Za-z0-9._-]{4,50}$")
+# Solo dígitos: evita notación científica (1e5), signos, guiones bajos e Infinity.
+DECIMAL_RE = re.compile(r"^\d{1,10}([.,]\d{1,2})?$")
+INT_RE = re.compile(r"^\d{1,9}$")
 
 DOCUMENT_TYPES = ("CC", "CE", "NIT", "Pasaporte", "TI")
 CATEGORIES = (
@@ -87,6 +90,8 @@ def validate_decimal(value, field_name, min_value=Decimal("0.01")):
     text, error = required(value, field_name)
     if error:
         return None, error
+    if not DECIMAL_RE.match(text):
+        return None, f"{field_name} solo admite números (máximo 2 decimales)."
     try:
         number = Decimal(text.replace(",", "."))
     except (InvalidOperation, AttributeError):
@@ -100,6 +105,8 @@ def validate_int(value, field_name, min_value=0):
     text, error = required(value, field_name)
     if error:
         return None, error
+    if not INT_RE.match(text):
+        return None, f"{field_name} debe ser un número entero."
     try:
         number = int(text)
     except (TypeError, ValueError):

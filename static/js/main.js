@@ -27,6 +27,41 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    // input type="number" acepta e, E, + y - (notación científica); aquí solo se permiten dígitos.
+    document.querySelectorAll('input[type="number"]').forEach((input) => {
+        const entero = input.step === "1";
+        const bloqueadas = entero ? ["e", "E", "+", "-", ".", ","] : ["e", "E", "+", "-"];
+        const valido = entero ? /^\d+$/ : /^\d+([.,]\d{1,2})?$/;
+        const prohibido = entero ? /[^0-9]/ : /[^0-9.,]/;
+        input.addEventListener("keydown", (event) => {
+            if (bloqueadas.includes(event.key)) {
+                event.preventDefault();
+            }
+        });
+        // Cubre teclados de celular y autocompletado, que no siempre disparan keydown.
+        input.addEventListener("beforeinput", (event) => {
+            if (event.data && prohibido.test(event.data)) {
+                event.preventDefault();
+            }
+        });
+        input.addEventListener("paste", (event) => {
+            const texto = (event.clipboardData || window.clipboardData).getData("text").trim();
+            if (!valido.test(texto)) {
+                event.preventDefault();
+            }
+        });
+        input.addEventListener("drop", (event) => event.preventDefault());
+    });
+
+    document.querySelectorAll('input[type="tel"]').forEach((input) => {
+        input.addEventListener("input", () => {
+            const limpio = input.value.replace(/[^0-9+\-\s()]/g, "");
+            if (limpio !== input.value) {
+                input.value = limpio;
+            }
+        });
+    });
+
     const indicadoresApi = document.querySelectorAll("[data-api-status]");
     if (indicadoresApi.length && window.ViveroAPI) {
         window.ViveroAPI.salud()
