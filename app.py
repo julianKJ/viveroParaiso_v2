@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 from flask import Flask, render_template, redirect, url_for, session
 from flask_wtf.csrf import CSRFProtect, CSRFError
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from database import close_connection, DatabaseError
 
@@ -14,6 +15,9 @@ def create_app():
     from config import Config
 
     app.config.from_object(Config)
+    if app.config["TRUST_PROXY"]:
+        # Toma solo la IP que agregó el proxy de confianza, no las que envía el visitante
+        app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
     csrf.init_app(app)
 
     from blueprints.auth import bp as auth_bp

@@ -29,5 +29,9 @@ class Config:
     API_BASE_URL = os.getenv("API_BASE_URL", "http://127.0.0.1:4000/api")
 
     MAX_LOGIN_ATTEMPTS = int(os.getenv("MAX_LOGIN_ATTEMPTS", "5"))
+    # Tope por cuenta sin importar la IP, para que cambiar de IP no permita probar claves sin fin
+    MAX_ACCOUNT_ATTEMPTS = int(os.getenv("MAX_ACCOUNT_ATTEMPTS", "15"))
+    # Detrás de un proxy (Render lo define con RENDER=true) la IP real llega en X-Forwarded-For
+    TRUST_PROXY = _bool(os.getenv("TRUST_PROXY"), _bool(os.getenv("RENDER"), False))
     LOGIN_LOCK_MINUTES = int(os.getenv("LOGIN_LOCK_MINUTES", "15"))
     ITEMS_PER_PAGE = int(os.getenv("ITEMS_PER_PAGE", "10"))

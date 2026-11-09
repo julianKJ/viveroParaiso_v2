@@ -9,8 +9,14 @@ bp = Blueprint("auth", __name__)
 
 
 def _attempt_key(identificador):
-    ip = request.headers.get("X-Forwarded-For", request.remote_addr or "unknown").split(",")[0].strip()
-    return f"{ip}:{identificador.lower()}"
+    # remote_addr ya viene corregida por ProxyFix cuando hay proxy; X-Forwarded-For
+    # no se lee directo porque el visitante puede inventarlo para evitar el bloqueo
+    ip = request.remote_addr or "unknown"
+    return f"{ip}:{identificador.lower()[:120]}"
+
+
+def _account_key(identificador):
+    return f"cuenta:{identificador.lower()[:120]}"
 
 
 @bp.route("/login", methods=["GET", "POST"])
@@ -27,8 +33,9 @@ def login():
             return render_template("login.html")
 
         clave = _attempt_key(identificador)
+        clave_cuenta = _account_key(identificador)
         try:
-            if usuarios.is_locked(clave):
+            if usuarios.is_locked(clave) or usuarios.is_locked(clave_cuenta):
                 flash(
                     "Demasiados intentos fallidos. Espere unos minutos e inténtelo de nuevo.",
                     "error",
@@ -46,6 +53,11 @@ def login():
                     current_app.config["MAX_LOGIN_ATTEMPTS"],
                     current_app.config["LOGIN_LOCK_MINUTES"],
                 )
+                locked = usuarios.register_failed_attempt(
+                    clave_cuenta,
+                    current_app.config["MAX_ACCOUNT_ATTEMPTS"],
+                    current_app.config["LOGIN_LOCK_MINUTES"],
+                ) or locked
                 if locked:
                     flash(
                         "La cuenta de acceso quedó temporalmente bloqueada por intentos fallidos.",
@@ -56,6 +68,7 @@ def login():
                 return render_template("login.html")
 
             usuarios.clear_attempts(clave)
+            usuarios.clear_attempts(clave_cuenta)
             session.clear()
             session.permanent = True
             session["user_id"] = user["id"]
