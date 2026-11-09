@@ -4,3 +4,4 @@ mysql-connector-python==9.1.0
 python-dotenv==1.0.1
 Werkzeug==3.0.6
 pytest==8.3.3
+gunicorn==23.0.0

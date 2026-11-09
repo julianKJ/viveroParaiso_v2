@@ -13,3 +13,4 @@ htmlcov/
 *.zip
 instance/
 node_modules/
+.env.aiven

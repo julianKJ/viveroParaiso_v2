@@ -1,8 +1,9 @@
 """Carga datos de demostración. Requiere que la base y el administrador existan."""
+import os
 from datetime import date, timedelta
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(os.getenv("ENV_FILE") or None)
 
 from flask import Flask
 from config import Config

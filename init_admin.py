@@ -6,7 +6,7 @@ import sys
 from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash
 
-load_dotenv()
+load_dotenv(os.getenv("ENV_FILE") or None)
 
 from flask import Flask
 from config import Config
