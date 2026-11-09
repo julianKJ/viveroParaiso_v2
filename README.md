@@ -239,7 +239,6 @@ Abre tu navegador web e ingresa a:
 | Tipo de Acceso | Usuario / Identificador | Contraseña | Rol | Notas |
 | :--- | :--- | :--- | :--- | :--- |
 | **Producción / Normal** | Configurado en `init_admin.py` | Configurada al inicializar | `admin` | Requiere MySQL activo con tablas creadas. |
-| **Pruebas / Interno (Bypass)** | `admin` | `admin123` | `admin` | Acceso rápido para testeo y revisión de vistas sin fricción. |
 
 ---
 

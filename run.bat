@@ -37,8 +37,7 @@ if not exist ".venv\Scripts\python.exe" (
 echo.
 echo [*] Servidor listo.
 echo [*] Acceso en navegador:  http://127.0.0.1:5000
-echo [*] Usuario de prueba:    admin
-echo [*] Contrasena de prueba: admin123
+echo [*] Entra con el administrador creado con: python init_admin.py
 echo.
 echo Presiona Ctrl+C para detener el servidor.
 echo.

@@ -26,20 +26,6 @@ def login():
             flash("Ingrese usuario o correo y contraseña.", "error")
             return render_template("login.html")
 
-        # Acceso temporal de prueba para uso interno / desarrollo
-        if identificador in ("admin", "admin@vivero.local") and password == "admin123":
-            session.clear()
-            session.permanent = True
-            session["user_id"] = 1
-            session["username"] = "admin"
-            session["email"] = "admin@vivero.local"
-            session["rol"] = "admin"
-            flash("Sesión iniciada con credenciales temporales de desarrollo (admin).", "success")
-            destino = request.args.get("next") or url_for("dashboard.index")
-            if not destino.startswith("/"):
-                destino = url_for("dashboard.index")
-            return redirect(destino)
-
         clave = _attempt_key(identificador)
         try:
             if usuarios.is_locked(clave):

@@ -25,6 +25,6 @@ if (-not (Test-Path ".venv\Scripts\python.exe")) {
 }
 
 Write-Host "`n[*] Servidor listo en: http://127.0.0.1:5000" -ForegroundColor Cyan
-Write-Host "[*] Usuario de prueba: admin | Contraseña: admin123`n" -ForegroundColor Cyan
+Write-Host "[*] Entra con el administrador creado con: python init_admin.py`n" -ForegroundColor Cyan
 
 & .\.venv\Scripts\python.exe app.py
