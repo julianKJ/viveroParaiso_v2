@@ -1,7 +1,10 @@
-"""Crea la base y las tablas de schema.sql en el servidor MySQL configurado.
+"""Ejecuta un script SQL (por defecto schema.sql) en el servidor MySQL configurado.
 
 Sirve para servidores donde no hay cliente `mysql` a mano (por ejemplo Aiven).
 Lee la conexión de .env o de las variables de entorno, igual que la app.
+
+    python cargar_schema.py                         # crea la base y las tablas
+    python cargar_schema.py migracion_parcial.sql   # migra una base de la versión anterior
 """
 import os
 import sys
@@ -16,9 +19,11 @@ from config import Config
 
 
 def main():
-    with open(os.path.join(os.path.dirname(__file__), "schema.sql"), encoding="utf-8") as fh:
+    archivo = sys.argv[1] if len(sys.argv) > 1 else "schema.sql"
+    ruta = archivo if os.path.isabs(archivo) else os.path.join(os.path.dirname(os.path.abspath(__file__)), archivo)
+    with open(ruta, encoding="utf-8") as fh:
         script = fh.read()
-    # Sin comentarios de línea; el schema no usa DELIMITER, así que basta separar por ';'
+    # Sin comentarios de línea; los scripts no usan DELIMITER, así que basta separar por ';'
     lineas = [l for l in script.splitlines() if not l.strip().startswith("--")]
     sentencias = [s.strip() for s in "\n".join(lineas).split(";") if s.strip()]
 
@@ -37,16 +42,19 @@ def main():
 
     cursor = conn.cursor()
     try:
-        for sentencia in sentencias:
-            cursor.execute(sentencia)
+        for numero, sentencia in enumerate(sentencias, start=1):
+            try:
+                cursor.execute(sentencia)
+            except Error as exc:
+                resumen = " ".join(sentencia.split())[:160]
+                print(f"Error en la sentencia {numero} de {archivo}: {exc.msg}")
+                print(f"  {resumen}")
+                sys.exit(1)
         conn.commit()
-    except Error as exc:
-        print(f"Error ejecutando schema.sql: {exc.msg}")
-        sys.exit(1)
     finally:
         cursor.close()
         conn.close()
-    print(f"Tablas creadas en {Config.MYSQL_HOST} ({len(sentencias)} sentencias).")
+    print(f"{archivo} ejecutado en {Config.MYSQL_HOST} ({len(sentencias)} sentencias).")
 
 
 if __name__ == "__main__":

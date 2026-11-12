@@ -28,15 +28,15 @@
             <tbody>
                 {% for item in proveedores %}
                 <tr>
-                    <td>{{ item.id }}</td>
-                    <td><a href="{{ url_for('proveedores.detalle', proveedor_id=item.id) }}">{{ item.nombre_empresa }}</a></td>
+                    <td>{{ item.id_proveedor }}</td>
+                    <td><a href="{{ url_for('proveedores.detalle', proveedor_id=item.id_proveedor) }}">{{ item.nombre_empresa }}</a></td>
                     <td>{{ item.nit }}</td>
                     <td>{{ item.persona_contacto }}</td>
                     <td>{{ item.telefono }}</td>
                     <td><span class="badge {% if item.estado == 'Activo' %}badge-ok{% else %}badge-warn{% endif %}">{{ item.estado }}</span></td>
                     <td class="actions">
-                        <a class="icon-btn" href="{{ url_for('proveedores.editar', proveedor_id=item.id) }}" title="Editar"><i class="fa-solid fa-pen"></i></a>
-                        <form method="post" action="{{ url_for('proveedores.eliminar', proveedor_id=item.id) }}" class="inline js-confirm-delete" data-message="¿Eliminar al proveedor {{ item.nombre_empresa }}? Si tiene productos asociados, la operación será rechazada.">
+                        <a class="icon-btn" href="{{ url_for('proveedores.editar', proveedor_id=item.id_proveedor) }}" title="Editar"><i class="fa-solid fa-pen"></i></a>
+                        <form method="post" action="{{ url_for('proveedores.eliminar', proveedor_id=item.id_proveedor) }}" class="inline js-confirm-delete" data-message="¿Eliminar al proveedor {{ item.nombre_empresa }}? Si tiene productos asociados, la operación será rechazada.">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button class="icon-btn danger" type="submit" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
                         </form>

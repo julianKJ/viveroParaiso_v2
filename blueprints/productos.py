@@ -3,8 +3,8 @@ from mysql.connector import Error
 
 from blueprints.helpers import paginacion, form_data
 from data import productos, proveedores
-from database import DatabaseError
-from utils.auth import login_required
+from database import DatabaseError, es_restriccion_fk
+from utils.auth import admin_required, login_required
 from utils.validators import (
     CATEGORIES,
     clean,
@@ -24,7 +24,7 @@ FIELDS = (
     "precio_venta",
     "cantidad_disponible",
     "stock_minimo",
-    "proveedor_id",
+    "id_proveedor",
 )
 
 
@@ -37,7 +37,7 @@ def _validar(payload, excluir_id=None):
         validate_decimal(payload.get("precio_venta"), "precio de venta"),
         validate_int(payload.get("cantidad_disponible"), "cantidad disponible", 0),
         validate_int(payload.get("stock_minimo"), "stock mínimo", 0),
-        validate_int(payload.get("proveedor_id"), "proveedor", 1),
+        validate_int(payload.get("id_proveedor"), "proveedor", 1),
     )
     nombre, categoria, descripcion, compra, venta, cantidad, minimo, proveedor_id = values
     if compra is not None and venta is not None and venta < compra:
@@ -57,7 +57,7 @@ def _validar(payload, excluir_id=None):
         "precio_venta": venta,
         "cantidad_disponible": cantidad,
         "stock_minimo": minimo,
-        "proveedor_id": proveedor_id,
+        "id_proveedor": proveedor_id,
     }, []
 
 
@@ -95,7 +95,7 @@ def lista():
 
 
 @bp.route("/nuevo", methods=["GET", "POST"])
-@login_required
+@admin_required
 def crear():
     lista_proveedores = proveedores.activos()
     if request.method == "POST":
@@ -124,21 +124,21 @@ def detalle(producto_id):
 
 
 @bp.route("/<int:producto_id>/editar", methods=["GET", "POST"])
-@login_required
+@admin_required
 def editar(producto_id):
     producto = productos.obtener(producto_id)
     if not producto:
         abort(404)
     lista_proveedores = proveedores.activos()
-    if producto["proveedor_id"] and not any(p["id"] == producto["proveedor_id"] for p in lista_proveedores):
-        lista_proveedores.append({"id": producto["proveedor_id"], "nombre_empresa": producto["proveedor_nombre"]})
+    if producto["id_proveedor"] and not any(p["id_proveedor"] == producto["id_proveedor"] for p in lista_proveedores):
+        lista_proveedores.append({"id_proveedor": producto["id_proveedor"], "nombre_empresa": producto["proveedor_nombre"]})
     if request.method == "POST":
         payload = form_data(FIELDS)
         data, errors = _validar(payload, excluir_id=producto_id)
         if errors:
             for error in errors:
                 flash(error, "error")
-            payload["id"] = producto_id
+            payload["id_producto"] = producto_id
             return render_template("productos/formulario.html", producto=payload, proveedores=lista_proveedores, modo="editar")
         try:
             productos.actualizar(producto_id, data)
@@ -150,14 +150,25 @@ def editar(producto_id):
 
 
 @bp.route("/<int:producto_id>/eliminar", methods=["POST"])
-@login_required
+@admin_required
 def eliminar(producto_id):
     producto = productos.obtener(producto_id)
     if not producto:
         abort(404)
+    ventas = productos.contar_ventas(producto_id)
+    if ventas:
+        flash(
+            f"No se puede eliminar el producto porque tiene {ventas} venta(s) registrada(s). "
+            "Puede dejar su stock en 0 para que no se venda más.",
+            "error",
+        )
+        return redirect(url_for("productos.detalle", producto_id=producto_id))
     try:
         productos.eliminar(producto_id)
         flash("Producto eliminado correctamente.", "success")
-    except (DatabaseError, Error):
-        flash("No se pudo eliminar el producto.", "error")
+    except (DatabaseError, Error) as exc:
+        if es_restriccion_fk(exc):
+            flash("No se puede eliminar el producto porque tiene ventas registradas.", "error")
+        else:
+            flash("No se pudo eliminar el producto.", "error")
     return redirect(url_for("productos.lista"))

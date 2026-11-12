@@ -17,7 +17,9 @@
         </label>
         <button class="btn btn-secondary" type="submit"><i class="fa-solid fa-magnifying-glass"></i> Buscar</button>
     </form>
+    {% if es_admin %}
     <a class="btn btn-primary" href="{{ url_for('productos.crear') }}"><i class="fa-solid fa-plus"></i> Registrar producto</a>
+    {% endif %}
 </div>
 <div class="section-title">
     <small>Catálogo</small>
@@ -32,24 +34,29 @@
         {% if item.cantidad_disponible <= item.stock_minimo %}
         <span class="badge badge-warn">Stock bajo</span>
         {% endif %}
-        {% set foto = imagen_producto(item.id) %}
-        <a class="plant-media{% if foto %} has-photo{% endif %}" href="{{ url_for('productos.detalle', producto_id=item.id) }}">
+        {% set foto = imagen_producto(item.id_producto) %}
+        <a class="plant-media{% if foto %} has-photo{% endif %}" href="{{ url_for('productos.detalle', producto_id=item.id_producto) }}">
             <img src="{{ url_for('static', filename=foto or 'img/planta.svg') }}" alt="{{ item.nombre if foto else '' }}">
         </a>
         <div class="plant-body">
-            <h3><a href="{{ url_for('productos.detalle', producto_id=item.id) }}">{{ item.nombre }}</a></h3>
+            <h3><a href="{{ url_for('productos.detalle', producto_id=item.id_producto) }}">{{ item.nombre }}</a></h3>
             <div class="plant-meta">
-                <span class="plant-price">${{ '%.0f'|format(item.precio_venta) }}</span>
+                <span class="plant-price">{{ item.precio_venta|pesos }}</span>
                 <span class="plant-stock">{{ item.cantidad_disponible }} en stock</span>
             </div>
             <div class="plant-foot">
                 <small title="Proveedor">{{ item.proveedor_nombre }}</small>
                 <div class="actions">
-                    <a class="icon-btn" href="{{ url_for('productos.editar', producto_id=item.id) }}" title="Editar"><i class="fa-solid fa-pen"></i></a>
-                    <form method="post" action="{{ url_for('productos.eliminar', producto_id=item.id) }}" class="inline js-confirm-delete" data-message="¿Eliminar el producto {{ item.nombre }}?">
+                    {% if item.cantidad_disponible > 0 %}
+                    <a class="icon-btn" href="{{ url_for('ventas.crear', producto=item.id_producto) }}" title="Vender"><i class="fa-solid fa-cash-register"></i></a>
+                    {% endif %}
+                    {% if es_admin %}
+                    <a class="icon-btn" href="{{ url_for('productos.editar', producto_id=item.id_producto) }}" title="Editar"><i class="fa-solid fa-pen"></i></a>
+                    <form method="post" action="{{ url_for('productos.eliminar', producto_id=item.id_producto) }}" class="inline js-confirm-delete" data-message="¿Eliminar el producto {{ item.nombre }}?">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button class="icon-btn danger" type="submit" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
                     </form>
+                    {% endif %}
                 </div>
             </div>
         </div>

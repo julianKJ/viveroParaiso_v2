@@ -6,8 +6,8 @@
     <header class="card-head">
         <h2>{{ proveedor.nombre_empresa }}</h2>
         <div class="actions">
-            <a class="btn btn-secondary" href="{{ url_for('proveedores.editar', proveedor_id=proveedor.id) }}"><i class="fa-solid fa-pen"></i> Editar</a>
-            <form method="post" action="{{ url_for('proveedores.eliminar', proveedor_id=proveedor.id) }}" class="inline js-confirm-delete" data-message="¿Eliminar este proveedor?">
+            <a class="btn btn-secondary" href="{{ url_for('proveedores.editar', proveedor_id=proveedor.id_proveedor) }}"><i class="fa-solid fa-pen"></i> Editar</a>
+            <form method="post" action="{{ url_for('proveedores.eliminar', proveedor_id=proveedor.id_proveedor) }}" class="inline js-confirm-delete" data-message="¿Eliminar este proveedor?">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button class="btn btn-danger" type="submit"><i class="fa-solid fa-trash"></i> Eliminar</button>
             </form>
@@ -17,7 +17,7 @@
     <p class="flash flash-warning"><i class="fa-solid fa-link"></i> Este proveedor tiene {{ asociados }} producto(s) asociado(s). Debe resolver esa relación antes de eliminarlo.</p>
     {% endif %}
     <dl class="details">
-        <div><dt>ID</dt><dd>{{ proveedor.id }}</dd></div>
+        <div><dt>ID</dt><dd>{{ proveedor.id_proveedor }}</dd></div>
         <div><dt>NIT</dt><dd>{{ proveedor.nit }}</dd></div>
         <div><dt>Contacto</dt><dd>{{ proveedor.persona_contacto }}</dd></div>
         <div><dt>Teléfono</dt><dd>{{ proveedor.telefono }}</dd></div>

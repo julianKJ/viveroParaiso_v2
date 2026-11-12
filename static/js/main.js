@@ -62,6 +62,39 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    document.querySelectorAll("[data-print]").forEach((boton) => {
+        boton.addEventListener("click", () => window.print());
+    });
+
+    // Formulario de venta: muestra precio, stock y total mientras se elige.
+    const formVenta = document.querySelector("[data-venta-form]");
+    if (formVenta) {
+        const producto = formVenta.querySelector("[data-producto]");
+        const cantidad = formVenta.querySelector("[data-cantidad]");
+        const pesos = new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 });
+        const campo = (nombre) => document.querySelector(`[data-resumen-${nombre}]`);
+        const actualizar = () => {
+            const opcion = producto.selectedOptions[0];
+            const precio = Number(opcion?.dataset.precio || 0);
+            const stock = Number(opcion?.dataset.stock || 0);
+            const unidades = Number(cantidad.value || 0);
+            if (!opcion || !opcion.value) {
+                ["precio", "stock", "restante", "total"].forEach((n) => { campo(n).textContent = "—"; });
+                cantidad.removeAttribute("max");
+                return;
+            }
+            cantidad.max = String(stock);
+            campo("precio").textContent = pesos.format(precio);
+            campo("stock").textContent = `${stock} unidad(es)`;
+            const restante = stock - unidades;
+            campo("restante").textContent = restante >= 0 ? `${restante} unidad(es)` : "Stock insuficiente";
+            campo("total").textContent = pesos.format(precio * unidades);
+        };
+        producto.addEventListener("change", actualizar);
+        cantidad.addEventListener("input", actualizar);
+        actualizar();
+    }
+
     const indicadoresApi = document.querySelectorAll("[data-api-status]");
     if (indicadoresApi.length && window.ViveroAPI) {
         window.ViveroAPI.salud()

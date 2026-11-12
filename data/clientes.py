@@ -1,106 +1,107 @@
 from database import query_all, query_one, execute
 
+COLUMNAS = "id_cliente, nombre, email, telefono, direccion, ciudad, pais, fecha_registro"
+
 
 def listar(busqueda=None, limite=10, offset=0):
     where = ""
     params = []
     if busqueda:
         where = """
-            WHERE nombres LIKE %s
-               OR apellidos LIKE %s
-               OR numero_documento LIKE %s
-               OR correo LIKE %s
+            WHERE nombre LIKE %s
+               OR email LIKE %s
+               OR ciudad LIKE %s
+               OR pais LIKE %s
         """
         term = f"%{busqueda}%"
         params.extend([term, term, term, term])
-    total_row = query_one(f"SELECT COUNT(*) AS total FROM clientes {where}", tuple(params))
+    total_row = query_one(f"SELECT COUNT(*) AS total FROM cliente {where}", tuple(params))
     sql = f"""
-        SELECT id, nombres, apellidos, tipo_documento, numero_documento,
-               telefono, correo, direccion, fecha_registro
-        FROM clientes
+        SELECT {COLUMNAS}
+        FROM cliente
         {where}
-        ORDER BY apellidos ASC, nombres ASC
+        ORDER BY nombre ASC
         LIMIT %s OFFSET %s
     """
     params.extend([limite, offset])
     return query_all(sql, tuple(params)), int(total_row["total"]) if total_row else 0
 
 
-def obtener(cliente_id):
-    return query_one("SELECT * FROM clientes WHERE id = %s", (cliente_id,))
+def todos():
+    """Lista completa para elegir el cliente de una venta."""
+    return query_all("SELECT id_cliente, nombre, email, ciudad, pais FROM cliente ORDER BY nombre")
 
 
-def documento_existe(numero, excluir_id=None):
-    if excluir_id:
-        row = query_one(
-            "SELECT id FROM clientes WHERE numero_documento = %s AND id <> %s",
-            (numero, excluir_id),
-        )
-    else:
-        row = query_one("SELECT id FROM clientes WHERE numero_documento = %s", (numero,))
-    return row is not None
+def obtener(id_cliente):
+    return query_one(f"SELECT {COLUMNAS} FROM cliente WHERE id_cliente = %s", (id_cliente,))
 
 
-def correo_existe(correo, excluir_id=None):
-    if excluir_id:
-        row = query_one(
-            "SELECT id FROM clientes WHERE correo = %s AND id <> %s",
-            (correo, excluir_id),
-        )
-    else:
-        row = query_one("SELECT id FROM clientes WHERE correo = %s", (correo,))
+def email_existe(email, excluir_id=None):
+    row = query_one(
+        "SELECT id_cliente FROM cliente WHERE email = %s AND id_cliente <> %s",
+        (email, excluir_id or 0),
+    )
     return row is not None
 
 
 def crear(data):
     sql = """
-        INSERT INTO clientes
-            (nombres, apellidos, tipo_documento, numero_documento, telefono, correo, direccion)
-        VALUES (%s, %s, %s, %s, %s, %s, %s)
+        INSERT INTO cliente (nombre, email, telefono, direccion, ciudad, pais)
+        VALUES (%s, %s, %s, %s, %s, %s)
     """
     last_id, _ = execute(
         sql,
-        (
-            data["nombres"],
-            data["apellidos"],
-            data["tipo_documento"],
-            data["numero_documento"],
-            data["telefono"],
-            data["correo"],
-            data["direccion"],
-        ),
+        (data["nombre"], data["email"], data["telefono"], data["direccion"], data["ciudad"], data["pais"]),
     )
     return last_id
 
 
-def actualizar(cliente_id, data):
+def actualizar(id_cliente, data):
     sql = """
-        UPDATE clientes
-        SET nombres = %s, apellidos = %s, tipo_documento = %s, numero_documento = %s,
-            telefono = %s, correo = %s, direccion = %s
-        WHERE id = %s
+        UPDATE cliente
+        SET nombre = %s, email = %s, telefono = %s, direccion = %s, ciudad = %s, pais = %s
+        WHERE id_cliente = %s
     """
     _, count = execute(
         sql,
         (
-            data["nombres"],
-            data["apellidos"],
-            data["tipo_documento"],
-            data["numero_documento"],
+            data["nombre"],
+            data["email"],
             data["telefono"],
-            data["correo"],
             data["direccion"],
-            cliente_id,
+            data["ciudad"],
+            data["pais"],
+            id_cliente,
         ),
     )
     return count
 
 
-def eliminar(cliente_id):
-    _, count = execute("DELETE FROM clientes WHERE id = %s", (cliente_id,))
+def contar_ventas(id_cliente):
+    row = query_one("SELECT COUNT(*) AS total FROM venta WHERE id_cliente = %s", (id_cliente,))
+    return int(row["total"]) if row else 0
+
+
+def eliminar(id_cliente):
+    _, count = execute("DELETE FROM cliente WHERE id_cliente = %s", (id_cliente,))
     return count
 
 
 def total():
-    row = query_one("SELECT COUNT(*) AS total FROM clientes")
+    row = query_one("SELECT COUNT(*) AS total FROM cliente")
     return int(row["total"]) if row else 0
+
+
+def reporte_por_pais():
+    """Opción B: clientes agrupados por nacionalidad (país), con el total de cada grupo."""
+    filas = query_all(f"SELECT {COLUMNAS} FROM cliente ORDER BY pais ASC, nombre ASC")
+    grupos = []
+    for fila in filas:
+        if not grupos or grupos[-1]["pais"] != fila["pais"]:
+            grupos.append({"pais": fila["pais"], "clientes": []})
+        grupos[-1]["clientes"].append(fila)
+    for grupo in grupos:
+        grupo["total"] = len(grupo["clientes"])
+        grupo["porcentaje"] = round(grupo["total"] * 100 / len(filas), 1)
+    grupos.sort(key=lambda g: (-g["total"], g["pais"]))
+    return grupos, len(filas)

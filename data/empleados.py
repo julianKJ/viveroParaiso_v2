@@ -14,11 +14,11 @@ def listar(busqueda=None, limite=10, offset=0):
         """
         term = f"%{busqueda}%"
         params.extend([term, term, term, term, term])
-    total_row = query_one(f"SELECT COUNT(*) AS total FROM empleados {where}", tuple(params))
+    total_row = query_one(f"SELECT COUNT(*) AS total FROM empleado {where}", tuple(params))
     sql = f"""
-        SELECT id, nombres, apellidos, tipo_documento, numero_documento, cargo,
+        SELECT id_empleado, nombres, apellidos, tipo_documento, numero_documento, cargo,
                telefono, correo, fecha_contratacion, estado_laboral, fecha_registro
-        FROM empleados
+        FROM empleado
         {where}
         ORDER BY apellidos ASC, nombres ASC
         LIMIT %s OFFSET %s
@@ -28,34 +28,34 @@ def listar(busqueda=None, limite=10, offset=0):
 
 
 def obtener(empleado_id):
-    return query_one("SELECT * FROM empleados WHERE id = %s", (empleado_id,))
+    return query_one("SELECT * FROM empleado WHERE id_empleado = %s", (empleado_id,))
 
 
 def documento_existe(numero, excluir_id=None):
     if excluir_id:
         row = query_one(
-            "SELECT id FROM empleados WHERE numero_documento = %s AND id <> %s",
+            "SELECT id_empleado FROM empleado WHERE numero_documento = %s AND id_empleado <> %s",
             (numero, excluir_id),
         )
     else:
-        row = query_one("SELECT id FROM empleados WHERE numero_documento = %s", (numero,))
+        row = query_one("SELECT id_empleado FROM empleado WHERE numero_documento = %s", (numero,))
     return row is not None
 
 
 def correo_existe(correo, excluir_id=None):
     if excluir_id:
         row = query_one(
-            "SELECT id FROM empleados WHERE correo = %s AND id <> %s",
+            "SELECT id_empleado FROM empleado WHERE correo = %s AND id_empleado <> %s",
             (correo, excluir_id),
         )
     else:
-        row = query_one("SELECT id FROM empleados WHERE correo = %s", (correo,))
+        row = query_one("SELECT id_empleado FROM empleado WHERE correo = %s", (correo,))
     return row is not None
 
 
 def crear(data):
     sql = """
-        INSERT INTO empleados
+        INSERT INTO empleado
             (nombres, apellidos, tipo_documento, numero_documento, cargo,
              telefono, correo, fecha_contratacion, estado_laboral)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
@@ -79,10 +79,10 @@ def crear(data):
 
 def actualizar(empleado_id, data):
     sql = """
-        UPDATE empleados
+        UPDATE empleado
         SET nombres = %s, apellidos = %s, tipo_documento = %s, numero_documento = %s,
             cargo = %s, telefono = %s, correo = %s, fecha_contratacion = %s, estado_laboral = %s
-        WHERE id = %s
+        WHERE id_empleado = %s
     """
     _, count = execute(
         sql,
@@ -103,10 +103,10 @@ def actualizar(empleado_id, data):
 
 
 def eliminar(empleado_id):
-    _, count = execute("DELETE FROM empleados WHERE id = %s", (empleado_id,))
+    _, count = execute("DELETE FROM empleado WHERE id_empleado = %s", (empleado_id,))
     return count
 
 
 def total():
-    row = query_one("SELECT COUNT(*) AS total FROM empleados")
+    row = query_one("SELECT COUNT(*) AS total FROM empleado")
     return int(row["total"]) if row else 0

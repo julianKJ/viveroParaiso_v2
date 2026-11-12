@@ -1,3 +1,5 @@
+from contextlib import contextmanager
+
 import mysql.connector
 from mysql.connector import Error, pooling
 from flask import current_app, g
@@ -98,6 +100,33 @@ def execute(sql, params=None, commit=True):
         raise DatabaseError("Error al guardar los datos.") from exc
     finally:
         cursor.close()
+
+
+@contextmanager
+def transaction():
+    """Agrupa varias sentencias: si una falla, se deshacen todas (commit o rollback)."""
+    conn = get_connection()
+    if conn.in_transaction:
+        # Cierra la lectura implícita abierta por consultas anteriores de la misma petición
+        conn.commit()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        yield cursor
+        conn.commit()
+    except Error as exc:
+        conn.rollback()
+        raise DatabaseError("Error al guardar los datos.") from exc
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        cursor.close()
+
+
+def es_restriccion_fk(error):
+    """True si el error viene de borrar un registro que otra tabla todavía usa (MySQL 1451)."""
+    causa = getattr(error, "__cause__", None)
+    return getattr(causa, "errno", None) == 1451
 
 
 def ping():

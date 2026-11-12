@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}{% if modo == 'editar' %}Editar usuario{% else %}Nuevo usuario{% endif %}{% endblock %}
+{% block heading %}{% if modo == 'editar' %}Editar usuario{% else %}Crear usuario{% endif %}{% endblock %}
+{% block content %}
+<article class="card form-card">
+    <form method="post" novalidate autocomplete="off">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-grid">
+            <label>Nombre de usuario *
+                <input type="text" name="nombre_usuario" required minlength="4" maxlength="50" value="{{ usuario.nombre_usuario or '' }}">
+            </label>
+            <label>Correo electrónico *
+                <input type="email" name="email" required maxlength="100" value="{{ usuario.email or '' }}">
+            </label>
+            <label>Rol *
+                <select name="rol" required>
+                    {% for rol in roles %}
+                    <option value="{{ rol }}" {% if usuario.rol == rol %}selected{% endif %}>{{ rol|capitalize }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>Estado *
+                <select name="estado" required>
+                    {% for estado in estados %}
+                    <option value="{{ estado }}" {% if usuario.estado == estado %}selected{% endif %}>{{ estado }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>Contraseña {% if modo == 'editar' %}(déjela vacía para no cambiarla){% else %}*{% endif %}
+                <input type="password" name="contrasena" {% if modo != 'editar' %}required{% endif %} minlength="8" autocomplete="new-password">
+            </label>
+            <label>Confirmar contraseña {% if modo != 'editar' %}*{% endif %}
+                <input type="password" name="confirmacion" {% if modo != 'editar' %}required{% endif %} minlength="8" autocomplete="new-password">
+            </label>
+        </div>
+        <p class="muted small">El administrador entra a los módulos 1, 2 y 3. El vendedor solo entra a Clientes (módulo 1) y Ventas (módulo 2). La contraseña se guarda cifrada.</p>
+        <div class="form-actions">
+            <a class="btn btn-ghost" href="{{ url_for('usuarios.lista') }}">Cancelar</a>
+            <button class="btn btn-primary" type="submit"><i class="fa-solid fa-floppy-disk"></i> Guardar</button>
+        </div>
+    </form>
+</article>
+{% endblock %}

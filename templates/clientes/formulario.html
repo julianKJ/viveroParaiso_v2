@@ -6,31 +6,29 @@
     <form method="post" novalidate>
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="form-grid">
-            <label>Nombres *
-                <input type="text" name="nombres" required maxlength="80" value="{{ cliente.nombres if cliente else '' }}">
+            <label class="full">Nombre completo *
+                <input type="text" name="nombre" required maxlength="100" value="{{ cliente.nombre if cliente else '' }}">
             </label>
-            <label>Apellidos *
-                <input type="text" name="apellidos" required maxlength="80" value="{{ cliente.apellidos if cliente else '' }}">
-            </label>
-            <label>Tipo de documento *
-                <select name="tipo_documento" required>
-                    <option value="">Seleccione</option>
-                    {% for tipo in ['CC','CE','NIT','Pasaporte','TI'] %}
-                    <option value="{{ tipo }}" {% if cliente and cliente.tipo_documento == tipo %}selected{% endif %}>{{ tipo }}</option>
-                    {% endfor %}
-                </select>
-            </label>
-            <label>Número de documento *
-                <input type="text" name="numero_documento" required maxlength="30" value="{{ cliente.numero_documento if cliente else '' }}">
+            <label>Correo electrónico *
+                <input type="email" name="email" required maxlength="100" value="{{ cliente.email if cliente else '' }}">
             </label>
             <label>Teléfono *
                 <input type="tel" name="telefono" required maxlength="20" value="{{ cliente.telefono if cliente else '' }}">
             </label>
-            <label>Correo electrónico *
-                <input type="email" name="correo" required maxlength="120" value="{{ cliente.correo if cliente else '' }}">
-            </label>
             <label class="full">Dirección *
-                <input type="text" name="direccion" required maxlength="200" value="{{ cliente.direccion if cliente else '' }}">
+                <input type="text" name="direccion" required maxlength="150" value="{{ cliente.direccion if cliente else '' }}">
+            </label>
+            <label>Ciudad *
+                <input type="text" name="ciudad" required maxlength="50" value="{{ cliente.ciudad if cliente else '' }}">
+            </label>
+            <label>País (nacionalidad) *
+                <select name="pais" required>
+                    <option value="">Seleccione</option>
+                    {% set pais_actual = cliente.pais if cliente else 'Colombia' %}
+                    {% for pais in paises %}
+                    <option value="{{ pais }}" {% if pais_actual == pais %}selected{% endif %}>{{ pais }}</option>
+                    {% endfor %}
+                </select>
             </label>
         </div>
         <div class="form-actions">

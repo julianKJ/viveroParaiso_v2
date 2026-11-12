@@ -12,7 +12,7 @@ from flask import Flask
 from config import Config
 from database import init_pool, close_connection, DatabaseError
 from data import usuarios
-from utils.validators import validate_email, validate_password, validate_username
+from utils.validators import ROL_ADMIN, validate_email, validate_password, validate_username
 
 
 def _prompt(label, env_name, secret=False):
@@ -35,7 +35,7 @@ def main():
             sys.exit(1)
 
         username, user_error = validate_username(_prompt("Usuario administrador", "ADMIN_USERNAME"))
-        email, email_error = validate_email(_prompt("Correo administrador", "ADMIN_EMAIL"))
+        email, email_error = validate_email(_prompt("Correo administrador", "ADMIN_EMAIL"), max_length=100)
         password, pass_error = validate_password(_prompt("Contraseña (mínimo 8 caracteres)", "ADMIN_PASSWORD", secret=True))
         errors = [e for e in (user_error, email_error, pass_error) if e]
         if errors:
@@ -52,7 +52,7 @@ def main():
             sys.exit(1)
 
         password_hash = generate_password_hash(password)
-        usuarios.create_user(username, email, password_hash, rol="admin")
+        usuarios.create_user(username, email, password_hash, rol=ROL_ADMIN)
         print(f"Administrador '{username}' creado correctamente.")
         close_connection()
 

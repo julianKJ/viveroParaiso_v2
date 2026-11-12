@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Reporte de clientes por nacionalidad{% endblock %}
+{% block heading %}Reporte de clientes por nacionalidad{% endblock %}
+{% block content %}
+<div class="toolbar no-print">
+    <a class="btn btn-ghost" href="{{ url_for('clientes.lista') }}"><i class="fa-solid fa-arrow-left"></i> Volver a clientes</a>
+    <button class="btn btn-primary" type="button" data-print><i class="fa-solid fa-print"></i> Imprimir reporte</button>
+</div>
+
+<article class="card print-sheet">
+    <header class="print-header">
+        <div>
+            <h2>{{ vivero_nombre }}</h2>
+            <p class="muted">Reporte de clasificación de clientes según su nacionalidad</p>
+        </div>
+        <div class="print-meta">
+            <span>Generado: {{ generado.strftime('%d/%m/%Y %H:%M') }}</span>
+            <span>Por: {{ usuario_actual.username }}</span>
+            <strong>{{ total }} cliente(s) · {{ grupos|length }} país(es)</strong>
+        </div>
+    </header>
+
+    {% if grupos %}
+    <h3 class="report-subtitle">Resumen por país</h3>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>País</th>
+                    <th class="num">Clientes</th>
+                    <th class="num">Porcentaje</th>
+                    <th class="no-print">Distribución</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for grupo in grupos %}
+                <tr>
+                    <td><a href="#pais-{{ loop.index }}">{{ grupo.pais }}</a></td>
+                    <td class="num">{{ grupo.total }}</td>
+                    <td class="num">{{ ("%.1f"|format(grupo.porcentaje))|replace(".", ",") }} %</td>
+                    <td class="no-print"><span class="bar" style="--valor: {{ grupo.porcentaje }}%"></span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th>Total</th>
+                    <th class="num">{{ total }}</th>
+                    <th class="num">100 %</th>
+                    <th class="no-print"></th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <h3 class="report-subtitle">Detalle de clientes por país</h3>
+    {% for grupo in grupos %}
+    <section class="report-group" id="pais-{{ loop.index }}">
+        <h4>{{ grupo.pais }} <small>({{ grupo.total }})</small></h4>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Correo</th>
+                        <th>Teléfono</th>
+                        <th>Ciudad</th>
+                        <th>Registro</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in grupo.clientes %}
+                    <tr>
+                        <td>{{ item.id_cliente }}</td>
+                        <td>{{ item.nombre }}</td>
+                        <td>{{ item.email }}</td>
+                        <td>{{ item.telefono }}</td>
+                        <td>{{ item.ciudad }}</td>
+                        <td>{{ item.fecha_registro.strftime('%d/%m/%Y') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+    {% endfor %}
+    {% else %}
+    <p class="empty">No hay clientes registrados para el reporte.</p>
+    {% endif %}
+</article>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Historial de facturas{% endblock %}
+{% block heading %}Historial de facturas{% endblock %}
+{% block content %}
+<div class="toolbar">
+    <form method="get" class="search-form">
+        <input type="search" name="q" value="{{ q or '' }}" placeholder="Buscar por número, cliente o producto">
+        <button class="btn btn-secondary" type="submit"><i class="fa-solid fa-magnifying-glass"></i> Buscar</button>
+    </form>
+    <a class="btn btn-primary" href="{{ url_for('ventas.crear') }}"><i class="fa-solid fa-plus"></i> Registrar venta</a>
+</div>
+<article class="card">
+    <p class="muted">{{ total }} factura(s) guardadas.</p>
+    {% if facturas %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Número</th>
+                    <th>Emisión</th>
+                    <th>Cliente</th>
+                    <th>Producto</th>
+                    <th class="num">Cant.</th>
+                    <th class="num">Total</th>
+                    <th>Generada por</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in facturas %}
+                <tr>
+                    <td><a href="{{ url_for('ventas.factura', factura_id=item.id_factura) }}">{{ item.numero_factura }}</a></td>
+                    <td>{{ item.fecha_emision.strftime('%d/%m/%Y %H:%M') }}</td>
+                    <td>{{ item.cliente_nombre }}</td>
+                    <td>{{ item.producto_nombre }}</td>
+                    <td class="num">{{ item.cantidad }}</td>
+                    <td class="num">{{ item.total|pesos }}</td>
+                    <td>{{ item.generada_por }}</td>
+                    <td class="actions">
+                        <a class="icon-btn" href="{{ url_for('ventas.factura', factura_id=item.id_factura) }}" title="Ver e imprimir"><i class="fa-solid fa-print"></i></a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% include "partials/pagination.html" %}
+    {% else %}
+    <p class="empty">Todavía no hay facturas generadas.</p>
+    {% endif %}
+</article>
+{% endblock %}

@@ -3,7 +3,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from blueprints.helpers import paginacion, form_data
 from data import proveedores
 from database import DatabaseError
-from utils.auth import login_required
+from utils.auth import admin_required
 from utils.validators import (
     ESTADOS_PROVEEDOR,
     clean,
@@ -57,7 +57,7 @@ def _validar(payload, excluir_id=None):
 
 
 @bp.route("/")
-@login_required
+@admin_required
 def lista():
     busqueda = clean(request.args.get("q"))
     try:
@@ -78,7 +78,7 @@ def lista():
 
 
 @bp.route("/nuevo", methods=["GET", "POST"])
-@login_required
+@admin_required
 def crear():
     if request.method == "POST":
         payload = form_data(FIELDS)
@@ -97,7 +97,7 @@ def crear():
 
 
 @bp.route("/<int:proveedor_id>")
-@login_required
+@admin_required
 def detalle(proveedor_id):
     proveedor = proveedores.obtener(proveedor_id)
     if not proveedor:
@@ -107,7 +107,7 @@ def detalle(proveedor_id):
 
 
 @bp.route("/<int:proveedor_id>/editar", methods=["GET", "POST"])
-@login_required
+@admin_required
 def editar(proveedor_id):
     proveedor = proveedores.obtener(proveedor_id)
     if not proveedor:
@@ -118,7 +118,7 @@ def editar(proveedor_id):
         if errors:
             for error in errors:
                 flash(error, "error")
-            payload["id"] = proveedor_id
+            payload["id_proveedor"] = proveedor_id
             return render_template("proveedores/formulario.html", proveedor=payload, modo="editar")
         try:
             proveedores.actualizar(proveedor_id, data)
@@ -130,7 +130,7 @@ def editar(proveedor_id):
 
 
 @bp.route("/<int:proveedor_id>/eliminar", methods=["POST"])
-@login_required
+@admin_required
 def eliminar(proveedor_id):
     proveedor = proveedores.obtener(proveedor_id)
     if not proveedor:

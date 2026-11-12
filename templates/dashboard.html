@@ -1,23 +1,36 @@
 {% extends "base.html" %}
-{% block title %}Dashboard{% endblock %}
+{% block title %}Inicio{% endblock %}
 {% block page_head %}
 <section class="hero">
     <img class="hero-bg hero-bg-panel" src="{{ url_for('static', filename='img/panel.webp') }}" alt="">
     <div class="hero-text">
-        <p class="hero-eyebrow">Panel de administración</p>
+        <p class="hero-eyebrow">{% if es_admin %}Panel del administrador{% else %}Panel del vendedor{% endif %}</p>
         <h1>Hola, {{ usuario_actual.username }}.<br>Tu vivero hoy</h1>
-        <p>Resumen operativo de {{ vivero_nombre }}: inventario, clientes, personal y proveedores.</p>
-        <a class="btn btn-primary" href="{{ url_for('productos.lista') }}"><i class="fa-solid fa-seedling"></i> Ver catálogo</a>
+        <p>
+            {% if es_admin %}
+            Tienes acceso a los tres módulos: clientes, ventas y gestión de usuarios.
+            {% else %}
+            Tienes acceso a clientes (módulo 1) y ventas (módulo 2).
+            {% endif %}
+        </p>
+        <a class="btn btn-primary" href="{{ url_for('ventas.crear') }}"><i class="fa-solid fa-cash-register"></i> Registrar venta</a>
     </div>
 </section>
 {% endblock %}
 {% block content %}
 <div class="stat-grid">
-    <a class="stat-card" href="{{ url_for('productos.lista') }}">
-        <i class="fa-solid fa-seedling"></i>
+    <a class="stat-card" href="{{ url_for('ventas.lista') }}">
+        <i class="fa-solid fa-cash-register"></i>
         <div>
-            <span>Productos</span>
-            <strong>{{ datos.productos }}</strong>
+            <span>Ventas de hoy</span>
+            <strong>{{ datos.ventas_hoy.cantidad }}</strong>
+        </div>
+    </a>
+    <a class="stat-card" href="{{ url_for('ventas.lista') }}">
+        <i class="fa-solid fa-sack-dollar"></i>
+        <div>
+            <span>Ingresos de hoy</span>
+            <strong>{{ datos.ventas_hoy.ingresos|pesos }}</strong>
         </div>
     </a>
     <a class="stat-card" href="{{ url_for('clientes.lista') }}">
@@ -27,67 +40,61 @@
             <strong>{{ datos.clientes }}</strong>
         </div>
     </a>
-    <a class="stat-card" href="{% if usuario_actual.rol == 'admin' %}{{ url_for('empleados.lista') }}{% else %}#{% endif %}">
-        <i class="fa-solid fa-id-badge"></i>
+    <a class="stat-card" href="{{ url_for('ventas.facturas_lista') }}">
+        <i class="fa-solid fa-file-invoice-dollar"></i>
         <div>
-            <span>Empleados</span>
-            <strong>{{ datos.empleados }}</strong>
-        </div>
-    </a>
-    <a class="stat-card" href="{{ url_for('proveedores.lista') }}">
-        <i class="fa-solid fa-truck-field"></i>
-        <div>
-            <span>Proveedores</span>
-            <strong>{{ datos.proveedores }}</strong>
+            <span>Facturas</span>
+            <strong>{{ datos.facturas }}</strong>
         </div>
     </a>
 </div>
 
 <div class="quick-actions">
-    <a class="btn btn-primary" href="{{ url_for('productos.crear') }}"><i class="fa-solid fa-plus"></i> Nuevo producto</a>
+    <a class="btn btn-primary" href="{{ url_for('ventas.crear') }}"><i class="fa-solid fa-cash-register"></i> Nueva venta</a>
     <a class="btn btn-secondary" href="{{ url_for('clientes.crear') }}"><i class="fa-solid fa-user-plus"></i> Nuevo cliente</a>
-    <a class="btn btn-secondary" href="{{ url_for('proveedores.crear') }}"><i class="fa-solid fa-plus"></i> Nuevo proveedor</a>
-    {% if usuario_actual.rol == 'admin' %}
-    <a class="btn btn-secondary" href="{{ url_for('empleados.crear') }}"><i class="fa-solid fa-id-card"></i> Nuevo empleado</a>
+    <a class="btn btn-secondary" href="{{ url_for('clientes.reporte') }}"><i class="fa-solid fa-earth-americas"></i> Reporte por nacionalidad</a>
+    {% if es_admin %}
+    <a class="btn btn-secondary" href="{{ url_for('usuarios.crear') }}"><i class="fa-solid fa-user-shield"></i> Nuevo usuario</a>
+    <a class="btn btn-secondary" href="{{ url_for('productos.crear') }}"><i class="fa-solid fa-plus"></i> Nuevo producto</a>
     {% endif %}
 </div>
 
 <div class="split">
     <article class="card">
         <header class="card-head">
-            <h2><i class="fa-solid fa-clock"></i> Productos recientes</h2>
-            <a href="{{ url_for('productos.lista') }}">Ver todos</a>
+            <h2><i class="fa-solid fa-clock"></i> Ventas recientes</h2>
+            <a href="{{ url_for('ventas.lista') }}">Ver todas</a>
         </header>
-        {% if datos.recientes %}
+        {% if datos.ventas_recientes %}
         <div class="table-wrap">
             <table>
                 <thead>
                     <tr>
-                        <th>Nombre</th>
-                        <th>Categoría</th>
-                        <th>Stock</th>
-                        <th>Precio</th>
+                        <th>Cliente</th>
+                        <th>Producto</th>
+                        <th class="num">Total</th>
+                        <th>Factura</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for item in datos.recientes %}
+                    {% for item in datos.ventas_recientes %}
                     <tr>
-                        <td><a href="{{ url_for('productos.detalle', producto_id=item.id) }}">{{ item.nombre }}</a></td>
-                        <td>{{ item.categoria }}</td>
-                        <td>{{ item.cantidad_disponible }}</td>
-                        <td>${{ '%.0f'|format(item.precio_venta) }}</td>
+                        <td><a href="{{ url_for('ventas.detalle', venta_id=item.id_venta) }}">{{ item.cliente_nombre }}</a></td>
+                        <td>{{ item.producto_nombre }} × {{ item.cantidad }}</td>
+                        <td class="num">{{ item.total|pesos }}</td>
+                        <td>{{ item.numero_factura or '—' }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
         {% else %}
-        <p class="empty">Aún no hay productos registrados.</p>
+        <p class="empty">Aún no hay ventas registradas.</p>
         {% endif %}
     </article>
     <article class="card">
         <header class="card-head">
-            <h2><i class="fa-solid fa-triangle-exclamation"></i> Existencias bajas</h2>
+            <h2><i class="fa-solid fa-triangle-exclamation"></i> Stock bajo</h2>
             <a href="{{ url_for('productos.lista', bajo_stock=1) }}">Filtrar</a>
         </header>
         {% if datos.stock_bajo %}
@@ -107,4 +114,30 @@
         {% endif %}
     </article>
 </div>
+
+{% if es_admin %}
+<div class="stat-grid stat-grid-3">
+    <a class="stat-card" href="{{ url_for('usuarios.lista') }}">
+        <i class="fa-solid fa-user-shield"></i>
+        <div>
+            <span>Usuarios</span>
+            <strong>{{ datos.usuarios }}</strong>
+        </div>
+    </a>
+    <a class="stat-card" href="{{ url_for('proveedores.lista') }}">
+        <i class="fa-solid fa-truck-field"></i>
+        <div>
+            <span>Proveedores</span>
+            <strong>{{ datos.proveedores }}</strong>
+        </div>
+    </a>
+    <a class="stat-card" href="{{ url_for('empleados.lista') }}">
+        <i class="fa-solid fa-id-badge"></i>
+        <div>
+            <span>Empleados</span>
+            <strong>{{ datos.empleados }}</strong>
+        </div>
+    </a>
+</div>
+{% endif %}
 {% endblock %}

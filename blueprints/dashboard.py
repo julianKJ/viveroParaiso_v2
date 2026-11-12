@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, flash
 
 from data.dashboard import resumen
 from database import DatabaseError
-from utils.auth import login_required
+from utils.auth import es_admin, login_required
 
 bp = Blueprint("dashboard", __name__)
 
@@ -11,15 +11,18 @@ bp = Blueprint("dashboard", __name__)
 @login_required
 def index():
     datos = {
-        "productos": 0,
         "clientes": 0,
+        "productos": 0,
+        "facturas": 0,
+        "usuarios": 0,
         "empleados": 0,
         "proveedores": 0,
-        "recientes": [],
+        "ventas_hoy": {"cantidad": 0, "ingresos": 0},
+        "ventas_recientes": [],
         "stock_bajo": [],
     }
     try:
-        datos = resumen()
+        datos.update(resumen(es_admin=es_admin()))
     except DatabaseError:
         flash("No se pudieron cargar los indicadores. Verifique MySQL.", "error")
     return render_template("dashboard.html", datos=datos)

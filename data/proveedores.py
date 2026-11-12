@@ -13,11 +13,11 @@ def listar(busqueda=None, limite=10, offset=0):
         """
         term = f"%{busqueda}%"
         params.extend([term, term, term, term])
-    total_row = query_one(f"SELECT COUNT(*) AS total FROM proveedores {where}", tuple(params))
+    total_row = query_one(f"SELECT COUNT(*) AS total FROM proveedor {where}", tuple(params))
     sql = f"""
-        SELECT id, nombre_empresa, nit, persona_contacto, telefono, correo,
+        SELECT id_proveedor, nombre_empresa, nit, persona_contacto, telefono, correo,
                direccion, productos_suministrados, estado, fecha_registro
-        FROM proveedores
+        FROM proveedor
         {where}
         ORDER BY nombre_empresa ASC
         LIMIT %s OFFSET %s
@@ -27,29 +27,29 @@ def listar(busqueda=None, limite=10, offset=0):
 
 
 def obtener(proveedor_id):
-    return query_one("SELECT * FROM proveedores WHERE id = %s", (proveedor_id,))
+    return query_one("SELECT * FROM proveedor WHERE id_proveedor = %s", (proveedor_id,))
 
 
 def activos():
     return query_all(
-        "SELECT id, nombre_empresa FROM proveedores WHERE estado = 'Activo' ORDER BY nombre_empresa"
+        "SELECT id_proveedor, nombre_empresa FROM proveedor WHERE estado = 'Activo' ORDER BY nombre_empresa"
     )
 
 
 def nit_existe(nit, excluir_id=None):
     if excluir_id:
         row = query_one(
-            "SELECT id FROM proveedores WHERE nit = %s AND id <> %s",
+            "SELECT id_proveedor FROM proveedor WHERE nit = %s AND id_proveedor <> %s",
             (nit, excluir_id),
         )
     else:
-        row = query_one("SELECT id FROM proveedores WHERE nit = %s", (nit,))
+        row = query_one("SELECT id_proveedor FROM proveedor WHERE nit = %s", (nit,))
     return row is not None
 
 
 def crear(data):
     sql = """
-        INSERT INTO proveedores
+        INSERT INTO proveedor
             (nombre_empresa, nit, persona_contacto, telefono, correo, direccion, productos_suministrados, estado)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
     """
@@ -71,10 +71,10 @@ def crear(data):
 
 def actualizar(proveedor_id, data):
     sql = """
-        UPDATE proveedores
+        UPDATE proveedor
         SET nombre_empresa = %s, nit = %s, persona_contacto = %s, telefono = %s,
             correo = %s, direccion = %s, productos_suministrados = %s, estado = %s
-        WHERE id = %s
+        WHERE id_proveedor = %s
     """
     _, count = execute(
         sql,
@@ -95,17 +95,17 @@ def actualizar(proveedor_id, data):
 
 def contar_productos(proveedor_id):
     row = query_one(
-        "SELECT COUNT(*) AS total FROM productos WHERE proveedor_id = %s",
+        "SELECT COUNT(*) AS total FROM producto WHERE id_proveedor = %s",
         (proveedor_id,),
     )
     return int(row["total"]) if row else 0
 
 
 def eliminar(proveedor_id):
-    _, count = execute("DELETE FROM proveedores WHERE id = %s", (proveedor_id,))
+    _, count = execute("DELETE FROM proveedor WHERE id_proveedor = %s", (proveedor_id,))
     return count
 
 
 def total():
-    row = query_one("SELECT COUNT(*) AS total FROM proveedores")
+    row = query_one("SELECT COUNT(*) AS total FROM proveedor")
     return int(row["total"]) if row else 0

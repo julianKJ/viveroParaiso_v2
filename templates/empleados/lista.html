@@ -27,14 +27,14 @@
             <tbody>
                 {% for item in empleados %}
                 <tr>
-                    <td>{{ item.id }}</td>
-                    <td><a href="{{ url_for('empleados.detalle', empleado_id=item.id) }}">{{ item.nombres }} {{ item.apellidos }}</a></td>
+                    <td>{{ item.id_empleado }}</td>
+                    <td><a href="{{ url_for('empleados.detalle', empleado_id=item.id_empleado) }}">{{ item.nombres }} {{ item.apellidos }}</a></td>
                     <td>{{ item.tipo_documento }} {{ item.numero_documento }}</td>
                     <td>{{ item.cargo }}</td>
                     <td><span class="badge {% if item.estado_laboral == 'Activo' %}badge-ok{% else %}badge-warn{% endif %}">{{ item.estado_laboral }}</span></td>
                     <td class="actions">
-                        <a class="icon-btn" href="{{ url_for('empleados.editar', empleado_id=item.id) }}" title="Editar"><i class="fa-solid fa-pen"></i></a>
-                        <form method="post" action="{{ url_for('empleados.eliminar', empleado_id=item.id) }}" class="inline js-confirm-delete" data-message="¿Eliminar al empleado {{ item.nombres }} {{ item.apellidos }}?">
+                        <a class="icon-btn" href="{{ url_for('empleados.editar', empleado_id=item.id_empleado) }}" title="Editar"><i class="fa-solid fa-pen"></i></a>
+                        <form method="post" action="{{ url_for('empleados.eliminar', empleado_id=item.id_empleado) }}" class="inline js-confirm-delete" data-message="¿Eliminar al empleado {{ item.nombres }} {{ item.apellidos }}?">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button class="icon-btn danger" type="submit" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
                         </form>

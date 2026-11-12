@@ -3,7 +3,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from blueprints.helpers import paginacion, form_data
 from data import empleados
 from database import DatabaseError
-from utils.auth import roles_required
+from utils.auth import admin_required
 from utils.validators import (
     CARGOS,
     DOCUMENT_TYPES,
@@ -65,7 +65,7 @@ def _validar(payload, excluir_id=None):
 
 
 @bp.route("/")
-@roles_required("admin")
+@admin_required
 def lista():
     busqueda = clean(request.args.get("q"))
     try:
@@ -79,7 +79,7 @@ def lista():
 
 
 @bp.route("/nuevo", methods=["GET", "POST"])
-@roles_required("admin")
+@admin_required
 def crear():
     if request.method == "POST":
         payload = form_data(FIELDS)
@@ -98,7 +98,7 @@ def crear():
 
 
 @bp.route("/<int:empleado_id>")
-@roles_required("admin")
+@admin_required
 def detalle(empleado_id):
     empleado = empleados.obtener(empleado_id)
     if not empleado:
@@ -107,7 +107,7 @@ def detalle(empleado_id):
 
 
 @bp.route("/<int:empleado_id>/editar", methods=["GET", "POST"])
-@roles_required("admin")
+@admin_required
 def editar(empleado_id):
     empleado = empleados.obtener(empleado_id)
     if not empleado:
@@ -118,7 +118,7 @@ def editar(empleado_id):
         if errors:
             for error in errors:
                 flash(error, "error")
-            payload["id"] = empleado_id
+            payload["id_empleado"] = empleado_id
             return render_template("empleados/formulario.html", empleado=payload, modo="editar")
         try:
             empleados.actualizar(empleado_id, data)
@@ -130,7 +130,7 @@ def editar(empleado_id):
 
 
 @bp.route("/<int:empleado_id>/eliminar", methods=["POST"])
-@roles_required("admin")
+@admin_required
 def eliminar(empleado_id):
     empleado = empleados.obtener(empleado_id)
     if not empleado:

@@ -1,10 +1,12 @@
 import os
+from decimal import Decimal
 from dotenv import load_dotenv
 from flask import Flask, render_template, redirect, url_for, session
 from flask_wtf.csrf import CSRFProtect, CSRFError
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from database import close_connection, DatabaseError
+from utils.validators import ROL_ADMIN
 
 load_dotenv()
 csrf = CSRFProtect()
@@ -26,6 +28,8 @@ def create_app():
     from blueprints.clientes import bp as clientes_bp
     from blueprints.empleados import bp as empleados_bp
     from blueprints.proveedores import bp as proveedores_bp
+    from blueprints.ventas import bp as ventas_bp
+    from blueprints.usuarios import bp as usuarios_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
@@ -33,6 +37,8 @@ def create_app():
     app.register_blueprint(clientes_bp)
     app.register_blueprint(empleados_bp)
     app.register_blueprint(proveedores_bp)
+    app.register_blueprint(ventas_bp)
+    app.register_blueprint(usuarios_bp)
 
     app.teardown_appcontext(close_connection)
 
@@ -44,11 +50,18 @@ def create_app():
                 return relativa
         return None
 
+    @app.template_filter("pesos")
+    def pesos(valor, decimales=0):
+        """Formato de moneda colombiano: $ 1.234.567 (punto de miles, coma decimal)."""
+        texto = f"{Decimal(str(valor or 0)):,.{decimales}f}"
+        return "$ " + texto.replace(",", "_").replace(".", ",").replace("_", ".")
+
     @app.context_processor
     def inject_globals():
         return {
             "vivero_nombre": "Vivero El Paraíso de las Plantas",
             "imagen_producto": imagen_producto,
+            "es_admin": session.get("rol") == ROL_ADMIN,
             "usuario_actual": {
                 "id": session.get("user_id"),
                 "username": session.get("username"),

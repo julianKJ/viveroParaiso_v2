@@ -3,7 +3,7 @@
 {% block content %}
 <section class="login-card error-card">
     <h1>403</h1>
-    <p>{{ mensaje or "No tiene permiso para acceder a este recurso. El módulo de empleados está reservado a administradores." }}</p>
+    <p>{{ mensaje or "No tiene permiso para acceder a este módulo. Su rol no incluye esta sección; si la necesita, pídasela a un administrador." }}</p>
     <a class="btn btn-primary" href="{{ url_for('dashboard.index') }}">Volver al panel</a>
 </section>
 {% endblock %}

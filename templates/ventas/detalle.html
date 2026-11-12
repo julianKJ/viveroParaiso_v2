@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Venta {{ venta.id_venta }}{% endblock %}
+{% block heading %}Detalle de la venta{% endblock %}
+{% block content %}
+<article class="card">
+    <header class="card-head">
+        <h2>Venta N.° {{ venta.id_venta }}</h2>
+        <div class="actions">
+            {% if venta.id_factura %}
+            <a class="btn btn-primary" href="{{ url_for('ventas.factura', factura_id=venta.id_factura) }}"><i class="fa-solid fa-file-invoice-dollar"></i> Ver factura {{ venta.numero_factura }}</a>
+            {% else %}
+            <form method="post" action="{{ url_for('ventas.generar_factura', venta_id=venta.id_venta) }}" class="inline">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="btn btn-primary" type="submit"><i class="fa-solid fa-file-invoice-dollar"></i> Generar factura</button>
+            </form>
+            {% endif %}
+        </div>
+    </header>
+    <dl class="details">
+        <div><dt>Fecha</dt><dd>{{ venta.fecha_venta.strftime('%d/%m/%Y %H:%M') }}</dd></div>
+        <div><dt>Vendedor</dt><dd>{{ venta.vendedor }}</dd></div>
+        <div><dt>Cliente</dt><dd><a href="{{ url_for('clientes.detalle', cliente_id=venta.id_cliente) }}">{{ venta.cliente_nombre }}</a></dd></div>
+        <div><dt>Correo del cliente</dt><dd>{{ venta.cliente_email }}</dd></div>
+        <div><dt>Producto</dt><dd><a href="{{ url_for('productos.detalle', producto_id=venta.id_producto) }}">{{ venta.producto_nombre }}</a></dd></div>
+        <div><dt>Categoría</dt><dd>{{ venta.producto_categoria }}</dd></div>
+        <div><dt>Cantidad</dt><dd>{{ venta.cantidad }}</dd></div>
+        <div><dt>Precio unitario</dt><dd>{{ venta.precio_unitario|pesos(2) }}</dd></div>
+        <div><dt>Total</dt><dd><strong>{{ venta.total|pesos(2) }}</strong></dd></div>
+        <div><dt>Factura</dt><dd>{{ venta.numero_factura or 'Pendiente' }}</dd></div>
+    </dl>
+    <a class="btn btn-ghost" href="{{ url_for('ventas.lista') }}"><i class="fa-solid fa-arrow-left"></i> Volver</a>
+</article>
+{% endblock %}

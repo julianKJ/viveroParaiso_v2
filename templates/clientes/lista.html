@@ -4,10 +4,13 @@
 {% block content %}
 <div class="toolbar">
     <form method="get" class="search-form">
-        <input type="search" name="q" value="{{ q or '' }}" placeholder="Buscar por nombre, documento o correo">
+        <input type="search" name="q" value="{{ q or '' }}" placeholder="Buscar por nombre, correo, ciudad o país">
         <button class="btn btn-secondary" type="submit"><i class="fa-solid fa-magnifying-glass"></i> Buscar</button>
     </form>
-    <a class="btn btn-primary" href="{{ url_for('clientes.crear') }}"><i class="fa-solid fa-user-plus"></i> Registrar cliente</a>
+    <div class="actions">
+        <a class="btn btn-secondary" href="{{ url_for('clientes.reporte') }}"><i class="fa-solid fa-earth-americas"></i> Reporte por nacionalidad</a>
+        <a class="btn btn-primary" href="{{ url_for('clientes.crear') }}"><i class="fa-solid fa-user-plus"></i> Registrar cliente</a>
+    </div>
 </div>
 <article class="card">
     <p class="muted">{{ total }} cliente(s) encontrados.</p>
@@ -18,23 +21,26 @@
                 <tr>
                     <th>ID</th>
                     <th>Nombre</th>
-                    <th>Documento</th>
-                    <th>Teléfono</th>
                     <th>Correo</th>
+                    <th>Teléfono</th>
+                    <th>Ciudad</th>
+                    <th>País</th>
                     <th></th>
                 </tr>
             </thead>
             <tbody>
                 {% for item in clientes %}
                 <tr>
-                    <td>{{ item.id }}</td>
-                    <td><a href="{{ url_for('clientes.detalle', cliente_id=item.id) }}">{{ item.nombres }} {{ item.apellidos }}</a></td>
-                    <td>{{ item.tipo_documento }} {{ item.numero_documento }}</td>
+                    <td>{{ item.id_cliente }}</td>
+                    <td><a href="{{ url_for('clientes.detalle', cliente_id=item.id_cliente) }}">{{ item.nombre }}</a></td>
+                    <td>{{ item.email }}</td>
                     <td>{{ item.telefono }}</td>
-                    <td>{{ item.correo }}</td>
+                    <td>{{ item.ciudad }}</td>
+                    <td>{{ item.pais }}</td>
                     <td class="actions">
-                        <a class="icon-btn" href="{{ url_for('clientes.editar', cliente_id=item.id) }}" title="Editar"><i class="fa-solid fa-pen"></i></a>
-                        <form method="post" action="{{ url_for('clientes.eliminar', cliente_id=item.id) }}" class="inline js-confirm-delete" data-message="¿Eliminar al cliente {{ item.nombres }} {{ item.apellidos }}?">
+                        <a class="icon-btn" href="{{ url_for('ventas.crear', cliente=item.id_cliente) }}" title="Registrar venta"><i class="fa-solid fa-cash-register"></i></a>
+                        <a class="icon-btn" href="{{ url_for('clientes.editar', cliente_id=item.id_cliente) }}" title="Editar"><i class="fa-solid fa-pen"></i></a>
+                        <form method="post" action="{{ url_for('clientes.eliminar', cliente_id=item.id_cliente) }}" class="inline js-confirm-delete" data-message="¿Eliminar al cliente {{ item.nombre }}?">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button class="icon-btn danger" type="submit" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
                         </form>

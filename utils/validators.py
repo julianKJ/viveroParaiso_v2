@@ -36,6 +36,42 @@ CARGOS = (
 ESTADOS_LABORALES = ("Activo", "Inactivo", "Vacaciones")
 ESTADOS_PROVEEDOR = ("Activo", "Inactivo")
 
+# Roles del sistema (parcial final, módulo 0).
+ROL_ADMIN = "administrador"
+ROL_VENDEDOR = "vendedor"
+ROLES = (ROL_ADMIN, ROL_VENDEDOR)
+ESTADOS_USUARIO = ("Activo", "Inactivo")
+
+# Países para el campo "pais" del cliente y el reporte por nacionalidad.
+PAISES = (
+    "Argentina",
+    "Bolivia",
+    "Brasil",
+    "Canadá",
+    "Chile",
+    "Colombia",
+    "Costa Rica",
+    "Cuba",
+    "Ecuador",
+    "El Salvador",
+    "España",
+    "Estados Unidos",
+    "Francia",
+    "Guatemala",
+    "Honduras",
+    "Italia",
+    "México",
+    "Nicaragua",
+    "Panamá",
+    "Paraguay",
+    "Perú",
+    "Puerto Rico",
+    "República Dominicana",
+    "Uruguay",
+    "Venezuela",
+    "Otro",
+)
+
 
 def clean(value):
     if value is None:
@@ -50,11 +86,20 @@ def required(value, field_name):
     return text, None
 
 
-def validate_email(value, field_name="correo electrónico"):
+def validate_text(value, field_name, max_length):
     text, error = required(value, field_name)
     if error:
         return None, error
-    if not EMAIL_RE.match(text):
+    if len(text) > max_length:
+        return None, f"El campo {field_name} admite máximo {max_length} caracteres."
+    return text, None
+
+
+def validate_email(value, field_name="correo electrónico", max_length=120):
+    text, error = required(value, field_name)
+    if error:
+        return None, error
+    if not EMAIL_RE.match(text) or len(text) > max_length:
         return None, f"Ingrese un {field_name} válido."
     return text.lower(), None
 

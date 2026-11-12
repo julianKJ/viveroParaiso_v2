@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Usuarios{% endblock %}
+{% block heading %}Gestión de usuarios{% endblock %}
+{% block content %}
+<div class="toolbar">
+    <form method="get" class="search-form">
+        <input type="search" name="q" value="{{ q or '' }}" placeholder="Buscar por usuario, correo o rol">
+        <button class="btn btn-secondary" type="submit"><i class="fa-solid fa-magnifying-glass"></i> Buscar</button>
+    </form>
+    <a class="btn btn-primary" href="{{ url_for('usuarios.crear') }}"><i class="fa-solid fa-user-plus"></i> Crear usuario</a>
+</div>
+<article class="card">
+    <p class="muted">{{ total }} usuario(s) con acceso al sistema.</p>
+    {% if usuarios %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Usuario</th>
+                    <th>Correo</th>
+                    <th>Rol</th>
+                    <th>Estado</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in usuarios %}
+                <tr>
+                    <td>{{ item.id_usuario }}</td>
+                    <td>
+                        {{ item.nombre_usuario }}
+                        {% if item.id_usuario == usuario_actual.id %}<small class="muted">(usted)</small>{% endif %}
+                    </td>
+                    <td>{{ item.email }}</td>
+                    <td><span class="badge {% if item.rol == 'administrador' %}badge-ok{% endif %}">{{ item.rol|capitalize }}</span></td>
+                    <td><span class="badge {% if item.estado == 'Activo' %}badge-ok{% else %}badge-warn{% endif %}">{{ item.estado }}</span></td>
+                    <td class="actions">
+                        <a class="icon-btn" href="{{ url_for('usuarios.editar', usuario_id=item.id_usuario) }}" title="Editar"><i class="fa-solid fa-pen"></i></a>
+                        {% if item.id_usuario != usuario_actual.id %}
+                        <form method="post" action="{{ url_for('usuarios.eliminar', usuario_id=item.id_usuario) }}" class="inline js-confirm-delete" data-message="¿Eliminar al usuario {{ item.nombre_usuario }}? Perderá el acceso al sistema.">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button class="icon-btn danger" type="submit" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% include "partials/pagination.html" %}
+    {% else %}
+    <p class="empty">No hay usuarios para mostrar.</p>
+    {% endif %}
+</article>
+{% endblock %}

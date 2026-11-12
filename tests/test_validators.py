@@ -50,3 +50,25 @@ def test_documento_valido():
     valor, error = validate_document("1020304050")
     assert error is None
     assert valor == "1020304050"
+
+
+def test_texto_respeta_longitud_maxima():
+    from utils.validators import validate_text
+
+    assert validate_text("Villavicencio", "ciudad", 50) == ("Villavicencio", None)
+    valor, error = validate_text("x" * 51, "ciudad", 50)
+    assert valor is None and "50" in error
+
+
+def test_pais_debe_estar_en_la_lista():
+    from utils.validators import PAISES, validate_choice
+
+    assert validate_choice("Colombia", PAISES, "país") == ("Colombia", None)
+    valor, error = validate_choice("Atlántida", PAISES, "país")
+    assert valor is None and error
+
+
+def test_roles_del_parcial():
+    from utils.validators import ROLES
+
+    assert ROLES == ("administrador", "vendedor")

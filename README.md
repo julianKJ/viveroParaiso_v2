@@ -26,10 +26,22 @@
 
 ## ✨ Características Principales
 
-* **📊 Dashboard de Indicadores:** Métricas en tiempo real de productos, clientes, colaboradores, proveedores y alertas visuales de inventario bajo stock mínimo.
-* **🌱 Gestión de Inventario:** Catálogo categorizado de plantas (interior, exterior, suculentas, flores) e insumos con control de precios de compra/venta y alertas de reposición.
-* **🤝 Proveedores y Clientes:** Registro detallado de contactos con validación de documentos y protección de integridad referencial (no permite borrar proveedores con productos activos).
-* **👥 Gestión de Personal y Roles (RBAC):** Módulo de empleados protegido por control de acceso basado en roles (`admin` / `empleado`).
+La aplicación cumple los módulos del **parcial final de Bases de Datos** (CRM + punto de venta POS sobre MySQL):
+
+| Módulo | Qué hace | Quién entra |
+| :--- | :--- | :--- |
+| **0. Inicio de sesión y menú** | Login con usuario o correo; el menú se arma según el rol. | Todos |
+| **1. Gestión de clientes** | **A:** CRUD de la tabla `cliente`. **B:** pantalla con todos los clientes y botón para imprimir el *reporte de clasificación por nacionalidad* (país). | Administrador y vendedor |
+| **2. Registro de ventas** | Venta de un producto a un cliente (`producto`, `venta`, `cliente`); la tabla `stock` disminuye con cada venta. Opción para **generar la factura**, que se guarda en `historial_facturas` y se puede imprimir. | Administrador y vendedor |
+| **3. Gestión de usuarios** | CRUD de la tabla `usuarios` (administradores y vendedores), contraseña cifrada y estado Activo/Inactivo. | Solo administrador |
+
+Además:
+
+* **📊 Panel de inicio** con ventas e ingresos del día, ventas recientes y alertas de stock bajo.
+* **🌱 Productos y stock:** catálogo de plantas e insumos. El vendedor lo consulta; el administrador lo edita.
+* **🚚 Proveedores y empleados:** módulos extra, solo para el administrador.
+* **🔐 Roles verificados en cada petición:** si el administrador desactiva a un usuario o le cambia el rol, el cambio se aplica de inmediato.
+* **🧾 Ventas seguras:** la venta y el descuento de stock van en una sola transacción con bloqueo de fila, así que dos ventas simultáneas no pueden vender la misma unidad ni dejar el stock negativo.
 * **🛡️ Seguridad Integral:** Protección contra CSRF, hashing con algoritmos modernos (Werkzeug/scrypt), consultas preparadas anti-SQLi y rate limiting contra ataques de fuerza bruta.
 
 ---
@@ -56,14 +68,18 @@ viveroParaiso_v2/
 │   ├── dashboard.py
 │   ├── empleados.py
 │   ├── productos.py
-│   └── proveedores.py
+│   ├── proveedores.py
+│   ├── usuarios.py         # Módulo 3: CRUD de usuarios
+│   └── ventas.py           # Módulo 2: ventas, facturas e historial
 ├── data/                   # Capa de acceso a datos (queries y transacciones SQL)
 │   ├── clientes.py
 │   ├── dashboard.py
 │   ├── empleados.py
 │   ├── productos.py
 │   ├── proveedores.py
-│   └── usuarios.py
+│   ├── usuarios.py
+│   ├── ventas.py           # Venta + descuento de stock en una transacción
+│   └── facturas.py         # Tabla historial_facturas
 ├── api/                    # Capa de datos Node.js + Express + Prisma (misma base MySQL)
 │   ├── prisma/             # schema.prisma (modelos equivalentes a las tablas)
 │   └── src/                # Servidor Express, rutas REST y cliente Prisma
@@ -77,14 +93,18 @@ viveroParaiso_v2/
 │   └── *.html
 ├── tests/                  # Suite de pruebas automatizadas
 │   ├── test_auth_routes.py
+│   ├── test_roles.py       # Permisos de administrador y vendedor
 │   └── test_validators.py
 ├── utils/                  # Helpers, decoradores de autenticación y validaciones
 ├── app.py                  # Punto de entrada de la aplicación
 ├── config.py               # Gestión centralizada de configuración
 ├── database.py             # Pool de conexiones MySQL
 ├── init_admin.py           # Script CLI para crear el superusuario inicial
+├── cambiar_clave.py        # Cambia la contraseña de un usuario y lo desbloquea
 ├── seed.py                 # Datos de prueba para demostración
 ├── schema.sql              # Estructura DDL de la base de datos
+├── migracion_parcial.sql   # Convierte una base de la versión anterior a la nueva estructura
+├── cargar_schema.py        # Ejecuta schema.sql (o la migración) sin cliente mysql
 ├── requirements.txt        # Dependencias de Python
 ├── run.bat                 # Lanzador automático de 1 clic (Windows)
 ├── run.ps1                 # Script de arranque para PowerShell
@@ -194,6 +214,16 @@ Get-Content .\schema.sql | mysql -u root -p
 **Opción B — Desde MySQL Workbench / DBeaver:**
 Abre una conexión a tu servidor local, abre el archivo `schema.sql` y ejecútalo por completo.
 
+**Opción C — Con Python (sin cliente mysql):**
+```powershell
+python cargar_schema.py
+```
+
+> **¿Ya tenías la base de la versión anterior?** (tablas `clientes`, `productos`, usuarios con rol `admin`/`empleado`). Haz un backup y ejecuta **una sola vez** la migración, que conserva los datos: el rol `admin` pasa a `administrador`, `empleado` pasa a `vendedor` y las cantidades de los productos pasan a la tabla `stock`.
+> ```powershell
+> python cargar_schema.py migracion_parcial.sql
+> ```
+
 ### 6. Cargar datos iniciales y usuario Administrador
 
 Para poblar la base de datos con los registros base y el usuario administrador:
@@ -208,7 +238,9 @@ Para poblar la base de datos con los registros base y el usuario administrador:
    ```powershell
    python seed.py
    ```
-   *(Inserta clientes, proveedores con sus NITs, plantas y alertas de stock de demostración).*
+   *(Inserta proveedores, plantas con su stock, clientes de varios países y un empleado de demostración).*
+
+3. **Crear vendedores:** entra como administrador y usa **Usuarios → Crear usuario** (módulo 3).
 
 ### 7. Iniciar el servidor de desarrollo
 
@@ -236,15 +268,26 @@ Abre tu navegador web e ingresa a:
 
 ## 🔑 Credenciales de Acceso
 
-| Tipo de Acceso | Usuario / Identificador | Contraseña | Rol | Notas |
-| :--- | :--- | :--- | :--- | :--- |
-| **Producción / Normal** | Configurado en `init_admin.py` | Configurada al inicializar | `admin` | Requiere MySQL activo con tablas creadas. |
+| Rol | Cómo se crea | Módulos a los que entra |
+| :--- | :--- | :--- |
+| `administrador` | `python init_admin.py` (el primero) o desde **Usuarios** | 1 Clientes, 2 Ventas, 3 Usuarios, más productos, proveedores y empleados |
+| `vendedor` | Desde **Usuarios → Crear usuario** | 1 Clientes y 2 Ventas (consulta de productos) |
+
+Las contraseñas nunca se guardan en el código: se piden al crear cada usuario y se guardan cifradas.
+
+**¿Olvidaste la contraseña del administrador?** Cámbiala desde la terminal (no se muestra al escribirla) y la cuenta queda desbloqueada:
+
+```powershell
+python cambiar_clave.py admin
+```
 
 ---
 
 ## � API Node.js + Prisma
 
 Además del backend Flask, el proyecto incluye una capa de acceso a datos en **Node.js + Express + Prisma** que trabaja sobre la **misma base MySQL** (`vivero_paraiso`) y expone endpoints JSON.
+
+> ⚠️ **Pendiente:** `api/prisma/schema.prisma` y sus rutas siguen describiendo las tablas de la versión anterior (`clientes`, `productos`, `id`). La aplicación Flask no depende de esta API; actualízala antes de volver a usarla.
 
 ```text
 api/
@@ -307,7 +350,7 @@ La URL base proviene de la configuración Flask `API_BASE_URL` (por defecto `htt
 
 ## 🧪 Pruebas Automatizadas
 
-El proyecto incluye una suite de pruebas con **pytest** para asegurar la integridad de rutas y utilidades:
+El proyecto incluye una suite de pruebas con **pytest** para rutas, permisos por rol (administrador / vendedor) y validaciones:
 
 ```powershell
 pytest -v

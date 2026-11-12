@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Registrar venta{% endblock %}
+{% block heading %}Registrar venta{% endblock %}
+{% block content %}
+{% if not clientes or not productos %}
+<article class="card">
+    {% if not clientes %}
+    <p class="flash flash-warning"><i class="fa-solid fa-triangle-exclamation"></i> No hay clientes registrados. <a href="{{ url_for('clientes.crear') }}">Registre un cliente</a> antes de vender.</p>
+    {% endif %}
+    {% if not productos %}
+    <p class="flash flash-warning"><i class="fa-solid fa-triangle-exclamation"></i> No hay productos con existencias para vender.</p>
+    {% endif %}
+    <a class="btn btn-ghost" href="{{ url_for('ventas.lista') }}"><i class="fa-solid fa-arrow-left"></i> Volver</a>
+</article>
+{% else %}
+<div class="split">
+    <article class="card form-card">
+        <form method="post" novalidate data-venta-form>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form-grid">
+                <label class="full">Cliente *
+                    <select name="id_cliente" required>
+                        <option value="">Seleccione un cliente</option>
+                        {% for c in clientes %}
+                        <option value="{{ c.id_cliente }}" {% if seleccion.id_cliente|string == c.id_cliente|string %}selected{% endif %}>{{ c.nombre }} · {{ c.email }} ({{ c.pais }})</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label class="full">Producto *
+                    <select name="id_producto" required data-producto>
+                        <option value="">Seleccione un producto</option>
+                        {% for p in productos %}
+                        <option value="{{ p.id_producto }}" data-precio="{{ p.precio_venta }}" data-stock="{{ p.cantidad_disponible }}" {% if seleccion.id_producto|string == p.id_producto|string %}selected{% endif %}>{{ p.nombre }} · {{ p.precio_venta|pesos }} · {{ p.cantidad_disponible }} disponibles</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>Cantidad *
+                    <input type="number" name="cantidad" required min="1" step="1" value="{{ seleccion.cantidad }}" data-cantidad>
+                </label>
+                <label class="check check-field">
+                    <input type="checkbox" name="generar_factura" value="1" {% if seleccion.generar_factura %}checked{% endif %}>
+                    Generar la factura al guardar
+                </label>
+            </div>
+            <div class="form-actions">
+                <a class="btn btn-ghost" href="{{ url_for('ventas.lista') }}">Cancelar</a>
+                <button class="btn btn-primary" type="submit"><i class="fa-solid fa-cash-register"></i> Registrar venta</button>
+            </div>
+        </form>
+    </article>
+    <article class="card sale-summary">
+        <header class="card-head">
+            <h2><i class="fa-solid fa-receipt"></i> Resumen</h2>
+        </header>
+        <dl class="details single">
+            <div><dt>Precio unitario</dt><dd data-resumen-precio>—</dd></div>
+            <div><dt>Disponibles</dt><dd data-resumen-stock>—</dd></div>
+            <div><dt>Quedarán en stock</dt><dd data-resumen-restante>—</dd></div>
+            <div><dt>Total a pagar</dt><dd class="sale-total" data-resumen-total>—</dd></div>
+        </dl>
+        <p class="muted small">Al registrar la venta, la cantidad se descuenta de la tabla <code>stock</code>.</p>
+    </article>
+</div>
+{% endif %}
+{% endblock %}

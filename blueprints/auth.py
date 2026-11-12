@@ -45,8 +45,8 @@ def login():
             user = usuarios.find_by_login(identificador)
             if (
                 not user
-                or not user.get("activo")
-                or not check_password_hash(user["password_hash"], password)
+                or user.get("estado") != "Activo"
+                or not check_password_hash(user["contrasena"], password)
             ):
                 locked = usuarios.register_failed_attempt(
                     clave,
@@ -71,11 +71,11 @@ def login():
             usuarios.clear_attempts(clave_cuenta)
             session.clear()
             session.permanent = True
-            session["user_id"] = user["id"]
-            session["username"] = user["username"]
+            session["user_id"] = user["id_usuario"]
+            session["username"] = user["nombre_usuario"]
             session["email"] = user["email"]
             session["rol"] = user["rol"]
-            flash(f"Bienvenido, {user['username']}.", "success")
+            flash(f"Bienvenido, {user['nombre_usuario']}.", "success")
             destino = request.args.get("next") or url_for("dashboard.index")
             if not destino.startswith("/"):
                 destino = url_for("dashboard.index")

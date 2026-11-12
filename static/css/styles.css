@@ -66,7 +66,7 @@ img { max-width: 100%; }
     -webkit-backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--borde-suave);
 }
-.brand { display: flex; gap: 0.7rem; align-items: center; color: var(--texto); }
+.brand { display: flex; gap: 0.7rem; align-items: center; color: var(--texto); flex-shrink: 0; }
 .brand:hover { color: var(--texto); }
 .brand strong { font-size: 1.15rem; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700; }
 .brand small { display: block; color: var(--texto-suave); font-size: 0.75rem; letter-spacing: 0.04em; }
@@ -418,14 +418,63 @@ tbody tr:hover { background: rgba(255, 255, 255, 0.03); }
 .demo-hint code { color: var(--acento); font-weight: 600; }
 .sidebar-backdrop { display: none; }
 
+/* ---------- Parcial final: ventas, facturas y reportes ---------- */
+.stat-grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.stat-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 1.4rem; }
+th.num, td.num { text-align: right; white-space: nowrap; }
+tfoot th { color: var(--texto); font-size: 0.85rem; border-bottom: 0; }
+.small { font-size: 0.85rem; }
+code { background: rgba(0, 0, 0, 0.25); padding: 0.1rem 0.35rem; border-radius: 6px; font-size: 0.85em; }
+.check-field { align-self: end; padding-bottom: 0.8rem; }
+a.badge:hover { filter: brightness(1.2); }
+
+.details.single { grid-template-columns: 1fr; }
+.sale-summary .details dd { font-size: 1.1rem; }
+.sale-total { color: var(--acento); font-size: 1.6rem !important; }
+
+.bar {
+    display: block;
+    height: 0.55rem;
+    min-width: 4rem;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--acento) var(--valor), rgba(255, 255, 255, 0.08) var(--valor));
+}
+.print-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding-bottom: 1.2rem;
+    margin-bottom: 1.2rem;
+    border-bottom: 1px solid var(--borde);
+}
+.print-header h2 { margin: 0 0 0.25rem; }
+.print-header p { margin: 0; }
+.print-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 0.2rem; color: var(--texto-suave); font-size: 0.9rem; }
+.print-meta strong { color: var(--texto); }
+.report-subtitle { margin: 1.6rem 0 0.6rem; font-size: 1.05rem; }
+.report-group { margin-top: 1.2rem; break-inside: avoid; }
+.report-group h4 { margin: 0 0 0.3rem; color: var(--acento); }
+.report-group h4 small { color: var(--texto-suave); font-weight: 400; }
+
+.invoice-brand { display: flex; gap: 0.8rem; align-items: center; }
+.invoice-number { font-size: 1.6rem; color: var(--acento) !important; letter-spacing: 0.04em; }
+.invoice-parties { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.2rem; }
+.invoice-parties section { padding: 0.9rem 1rem; border-radius: var(--radio-chico); background: rgba(0, 0, 0, 0.2); border: 1px solid var(--borde-suave); }
+.invoice-parties h3 { margin: 0 0 0.4rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--texto-suave); }
+.invoice-parties p { margin: 0.15rem 0; }
+.invoice-total { font-size: 1.2rem; color: var(--acento) !important; }
+.invoice-note { margin-top: 1.2rem; text-align: center; }
+
 /* ---------- Responsive ---------- */
-@media (max-width: 1100px) {
-    .side-nav a { padding: 0.55rem 0.75rem; }
+@media (max-width: 1280px) {
+    .topnav { gap: 1rem; padding: 1.2rem 1.4rem; }
+    .side-nav a { padding: 0.55rem 0.7rem; }
     .side-nav a i { display: none; }
 }
 
-@media (max-width: 980px) {
-    .app-shell { margin: 0; border-radius: 0; border: 0; min-height: 100vh; }
+/* Con el menú del administrador (7 opciones) la barra no cabe: pasa a menú lateral */
+@media (max-width: 1180px) {
     .topnav { padding: 1rem 1.2rem; gap: 0.8rem; }
     .icon-btn.menu-toggle { display: inline-flex; order: -1; }
     .side-nav {
@@ -446,7 +495,6 @@ tbody tr:hover { background: rgba(255, 255, 255, 0.03); }
     .side-nav a { border-radius: var(--radio-chico); padding: 0.8rem 1rem; }
     .side-nav a i { display: inline; }
     .top-user { margin-left: auto; }
-    .user-chip span { display: none; }
     .sidebar-backdrop.open {
         display: block;
         position: fixed;
@@ -454,8 +502,14 @@ tbody tr:hover { background: rgba(255, 255, 255, 0.03); }
         background: rgba(0, 0, 0, 0.5);
         z-index: 30;
     }
-    .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .split, .form-grid, .details, .login-card, .hero { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 980px) {
+    .app-shell { margin: 0; border-radius: 0; border: 0; min-height: 100vh; }
+    .user-chip span { display: none; }
+    .stat-grid, .stat-grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .split, .form-grid, .details, .login-card, .hero, .invoice-parties { grid-template-columns: 1fr; }
+    .print-meta { align-items: flex-start; }
     .hero { padding: 1.6rem 1.2rem; min-height: 420px; align-items: flex-end; }
     .hero-bg {
         width: 100%;
@@ -472,7 +526,24 @@ tbody tr:hover { background: rgba(255, 255, 255, 0.03); }
 }
 
 @media (max-width: 560px) {
-    .stat-grid { grid-template-columns: 1fr; }
+    .stat-grid, .stat-grid-2, .stat-grid-3 { grid-template-columns: 1fr; }
     .logout-form .btn span { display: none; }
     .search-form input, .search-form select { flex: 1 1 100%; width: 100%; min-width: 0; }
+}
+
+/* ---------- Impresión de reportes y facturas ---------- */
+@media print {
+    @page { margin: 14mm; }
+    body { background: #fff !important; color: #111; }
+    .app-shell { margin: 0; border: 0; border-radius: 0; background: #fff; box-shadow: none; min-height: 0; max-width: none; }
+    .topnav, .page-head, .no-print, .flash-stack, .sidebar-backdrop, .pagination { display: none !important; }
+    .content { padding: 0; }
+    .card { background: #fff; border: 0; padding: 0; backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: none; }
+    .muted, th, .print-meta, .invoice-parties h3, .report-group h4 small { color: #555 !important; }
+    .print-meta strong, tfoot th, .invoice-number, .invoice-total, .report-group h4, a { color: #111 !important; }
+    th, td { border-bottom: 1px solid #ccc; padding: 0.45rem 0.5rem; }
+    tbody tr:hover { background: none; }
+    .print-header { border-bottom: 2px solid #111; }
+    .invoice-parties section { background: #fff; border: 1px solid #ccc; }
+    .table-wrap { overflow: visible; }
 }

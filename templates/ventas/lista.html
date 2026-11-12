@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Ventas{% endblock %}
+{% block heading %}Registro de ventas{% endblock %}
+{% block content %}
+<div class="stat-grid stat-grid-2">
+    <div class="stat-card">
+        <i class="fa-solid fa-cash-register"></i>
+        <div>
+            <span>Ventas de hoy</span>
+            <strong>{{ hoy.cantidad }}</strong>
+        </div>
+    </div>
+    <div class="stat-card">
+        <i class="fa-solid fa-sack-dollar"></i>
+        <div>
+            <span>Ingresos de hoy</span>
+            <strong>{{ hoy.ingresos|pesos }}</strong>
+        </div>
+    </div>
+</div>
+<div class="toolbar">
+    <form method="get" class="search-form">
+        <input type="search" name="q" value="{{ q or '' }}" placeholder="Cliente, producto o factura">
+        <button class="btn btn-secondary" type="submit"><i class="fa-solid fa-magnifying-glass"></i> Buscar</button>
+    </form>
+    <div class="actions">
+        <a class="btn btn-secondary" href="{{ url_for('ventas.facturas_lista') }}"><i class="fa-solid fa-file-invoice-dollar"></i> Historial de facturas</a>
+        <a class="btn btn-primary" href="{{ url_for('ventas.crear') }}"><i class="fa-solid fa-plus"></i> Registrar venta</a>
+    </div>
+</div>
+<article class="card">
+    <p class="muted">{{ total }} venta(s) encontradas.</p>
+    {% if ventas %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>N.°</th>
+                    <th>Fecha</th>
+                    <th>Cliente</th>
+                    <th>Producto</th>
+                    <th class="num">Cant.</th>
+                    <th class="num">Total</th>
+                    <th>Vendedor</th>
+                    <th>Factura</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in ventas %}
+                <tr>
+                    <td><a href="{{ url_for('ventas.detalle', venta_id=item.id_venta) }}">{{ item.id_venta }}</a></td>
+                    <td>{{ item.fecha_venta.strftime('%d/%m/%Y %H:%M') }}</td>
+                    <td>{{ item.cliente_nombre }}</td>
+                    <td>{{ item.producto_nombre }}</td>
+                    <td class="num">{{ item.cantidad }}</td>
+                    <td class="num">{{ item.total|pesos }}</td>
+                    <td>{{ item.vendedor }}</td>
+                    <td>
+                        {% if item.id_factura %}
+                        <a class="badge badge-ok" href="{{ url_for('ventas.factura', factura_id=item.id_factura) }}">{{ item.numero_factura }}</a>
+                        {% else %}
+                        <a class="badge badge-warn" href="{{ url_for('ventas.detalle', venta_id=item.id_venta) }}">Sin factura</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% include "partials/pagination.html" %}
+    {% else %}
+    <p class="empty">No hay ventas para mostrar.</p>
+    {% endif %}
+</article>
+{% endblock %}

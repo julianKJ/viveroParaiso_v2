@@ -1,4 +1,7 @@
-"""Carga datos de demostración. Requiere que la base y el administrador existan."""
+"""Carga datos de demostración: proveedores, productos con stock, clientes de varios países y un empleado.
+
+Requiere que la base exista (schema.sql). Los usuarios se crean con init_admin.py y el módulo 3.
+"""
 import os
 from datetime import date, timedelta
 from dotenv import load_dotenv
@@ -21,7 +24,7 @@ def main():
             print(str(exc))
             return
 
-        if query_one("SELECT id FROM proveedores LIMIT 1"):
+        if query_one("SELECT id_proveedor FROM proveedor LIMIT 1"):
             print("Ya hay datos de demostración. No se insertó información duplicada.")
             return
 
@@ -59,7 +62,7 @@ def main():
                 "precio_venta": 45000,
                 "cantidad_disponible": 12,
                 "stock_minimo": 5,
-                "proveedor_id": p1,
+                "id_proveedor": p1,
             }
         )
         productos.crear(
@@ -71,7 +74,7 @@ def main():
                 "precio_venta": 9000,
                 "cantidad_disponible": 3,
                 "stock_minimo": 8,
-                "proveedor_id": p1,
+                "id_proveedor": p1,
             }
         )
         productos.crear(
@@ -83,21 +86,29 @@ def main():
                 "precio_venta": 14500,
                 "cantidad_disponible": 40,
                 "stock_minimo": 10,
-                "proveedor_id": p2,
+                "id_proveedor": p2,
             }
         )
 
-        clientes.crear(
-            {
-                "nombres": "María Camila",
-                "apellidos": "Gómez Ruiz",
-                "tipo_documento": "CC",
-                "numero_documento": "1020304050",
-                "telefono": "3001112233",
-                "correo": "maria.gomez@correo.com",
-                "direccion": "Calle 12 # 4-18, Armenia",
-            }
-        )
+        demo_clientes = [
+            ("María Camila Gómez Ruiz", "maria.gomez@correo.com", "3001112233", "Calle 12 # 4-18", "Villavicencio", "Colombia"),
+            ("Jorge Andrés Rincón", "jorge.rincon@correo.com", "3157778899", "Cra 33 # 15-40", "Bogotá", "Colombia"),
+            ("Luisa Fernanda Ortiz", "luisa.ortiz@correo.com", "3204445566", "Av. 40 # 22-10", "Acacías", "Colombia"),
+            ("Carlos Eduardo Pérez", "carlos.perez@correo.ve", "+58 4121234567", "Calle Bolívar 45", "Caracas", "Venezuela"),
+            ("Ana Lucía Torres", "ana.torres@correo.ec", "+593 991234567", "Av. Amazonas N34", "Quito", "Ecuador"),
+            ("Diego Ramírez Soto", "diego.ramirez@correo.mx", "+52 5512345678", "Insurgentes Sur 1200", "Ciudad de México", "México"),
+        ]
+        for nombre, email, telefono, direccion, ciudad, pais in demo_clientes:
+            clientes.crear(
+                {
+                    "nombre": nombre,
+                    "email": email,
+                    "telefono": telefono,
+                    "direccion": direccion,
+                    "ciudad": ciudad,
+                    "pais": pais,
+                }
+            )
         empleados.crear(
             {
                 "nombres": "Andrés",

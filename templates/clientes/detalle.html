@@ -1,25 +1,28 @@
 {% extends "base.html" %}
-{% block title %}{{ cliente.nombres }} {{ cliente.apellidos }}{% endblock %}
+{% block title %}{{ cliente.nombre }}{% endblock %}
 {% block heading %}Detalle del cliente{% endblock %}
 {% block content %}
 <article class="card">
     <header class="card-head">
-        <h2>{{ cliente.nombres }} {{ cliente.apellidos }}</h2>
+        <h2>{{ cliente.nombre }}</h2>
         <div class="actions">
-            <a class="btn btn-secondary" href="{{ url_for('clientes.editar', cliente_id=cliente.id) }}"><i class="fa-solid fa-pen"></i> Editar</a>
-            <form method="post" action="{{ url_for('clientes.eliminar', cliente_id=cliente.id) }}" class="inline js-confirm-delete" data-message="¿Eliminar este cliente?">
+            <a class="btn btn-primary" href="{{ url_for('ventas.crear', cliente=cliente.id_cliente) }}"><i class="fa-solid fa-cash-register"></i> Registrar venta</a>
+            <a class="btn btn-secondary" href="{{ url_for('clientes.editar', cliente_id=cliente.id_cliente) }}"><i class="fa-solid fa-pen"></i> Editar</a>
+            <form method="post" action="{{ url_for('clientes.eliminar', cliente_id=cliente.id_cliente) }}" class="inline js-confirm-delete" data-message="¿Eliminar este cliente?">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button class="btn btn-danger" type="submit"><i class="fa-solid fa-trash"></i> Eliminar</button>
             </form>
         </div>
     </header>
     <dl class="details">
-        <div><dt>ID</dt><dd>{{ cliente.id }}</dd></div>
-        <div><dt>Documento</dt><dd>{{ cliente.tipo_documento }} {{ cliente.numero_documento }}</dd></div>
+        <div><dt>ID</dt><dd>{{ cliente.id_cliente }}</dd></div>
+        <div><dt>Correo</dt><dd>{{ cliente.email }}</dd></div>
         <div><dt>Teléfono</dt><dd>{{ cliente.telefono }}</dd></div>
-        <div><dt>Correo</dt><dd>{{ cliente.correo }}</dd></div>
+        <div><dt>Ciudad</dt><dd>{{ cliente.ciudad }}</dd></div>
+        <div><dt>País</dt><dd>{{ cliente.pais }}</dd></div>
+        <div><dt>Ventas registradas</dt><dd>{{ ventas }}</dd></div>
         <div class="full"><dt>Dirección</dt><dd>{{ cliente.direccion }}</dd></div>
-        <div><dt>Fecha de registro</dt><dd>{{ cliente.fecha_registro }}</dd></div>
+        <div><dt>Fecha de registro</dt><dd>{{ cliente.fecha_registro.strftime('%d/%m/%Y %H:%M') }}</dd></div>
     </dl>
     <a class="btn btn-ghost" href="{{ url_for('clientes.lista') }}"><i class="fa-solid fa-arrow-left"></i> Volver</a>
 </article>
